@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Reset Code</title>
+    <style>
+      /* Reset & Variables */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --clr-accent: #3498db;
+        --clr-text: #333;
+        --clr-bg: #fff;
+        --clr-muted: #777;
+        --radius: 0.5rem;
+        --space: 1rem;
+      }
+
+      /* Base */
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Arial,
+          sans-serif;
+        background: #f5f8fa;
+        color: var(--clr-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: var(--space);
+      }
+
+      .card {
+        background: var(--clr-bg);
+        width: 100%;
+        max-width: 400px;
+        padding: calc(var(--space) * 2);
+        border-radius: var(--radius);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        text-align: center;
+      }
+
+      /* Header */
+      .card__header img,
+      .card__header svg {
+        max-width: 120px;
+        margin-bottom: var(--space);
+      }
+      .card__header h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: var(--space);
+        color: var(--clr-text);
+      }
+
+      /* Body */
+      .card__body p {
+        margin-bottom: var(--space);
+        line-height: 1.5;
+        color: var(--clr-text);
+        font-size: 1rem;
+      }
+      .otp {
+        font-family: monospace;
+        font-size: 2rem;
+        letter-spacing: 0.5rem;
+        padding: var(--space);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: var(--radius);
+        display: inline-block;
+        margin: var(--space) 0;
+      }
+      .card__body .expires {
+        font-size: 0.875rem;
+        color: #e74c3c;
+        margin-top: -0.5rem;
+        margin-bottom: var(--space);
+      }
+      .card__body a {
+        color: var(--clr-accent);
+        text-decoration: underline;
+        font-weight: 500;
+      }
+
+      .button {
+        display: inline-block;
+        margin-top: var(--space);
+        padding: 0.75rem 1.5rem;
+        background: var(--clr-accent);
+        color: #fff;
+        text-decoration: none;
+        border-radius: var(--radius);
+        font-weight: 500;
+        transition: background 0.2s ease;
+      }
+      .button:hover {
+        background: darken(var(--clr-accent), 10%);
+      }
+
+      /* Footer */
+      .card__footer {
+        margin-top: calc(var(--space) * 2);
+        font-size: 0.875rem;
+        color: var(--clr-muted);
+      }
+
+      @media (max-width: 400px) {
+        .card {
+          padding: var(--space);
+        }
+        .otp {
+          font-size: 1.5rem;
+          letter-spacing: 0.25rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__header">
+        <!-- Replace with your logo image or inline SVG -->
+        <svg width="120" height="40" viewBox="0 0 120 40">
+          <defs>
+            <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="var(--clr-accent)" />
+              <stop offset="100%" stop-color="#5766ce" />
+            </linearGradient>
+          </defs>
+          <rect width="120" height="40" rx="8" fill="url(#lg)" />
+          <text
+            x="60"
+            y="26"
+            text-anchor="middle"
+            fill="#fff"
+            font-family="system-ui"
+            font-size="16"
+            font-weight="600"
+          >
+            App Service
+          </text>
+        </svg>
+        <h1>Password Reset Code</h1>
+      </div>
+
+      <div class="card__body">
+        <p>Hello there,</p>
+        <p>
+          We received a request to reset your password for your App Service
+          account. Enter the 4‑digit code below to continue:
+        </p>
+        <div class="otp">${otpCode}</div>
+        <p class="expires">This code expires in 5 minutes.</p>
+        <p>
+          If you didn’t request this, simply ignore this email or
+          <a href="mailto:support@example.com">contact support</a>.
+        </p>
+      </div>
+
+      <div class="card__footer">
+        <p>Automated message: please do not reply to this email.</p>
+        <p>© 2025 App Service – All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>

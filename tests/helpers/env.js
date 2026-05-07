@@ -1,0 +1,26 @@
+export const applyTestEnv = () => {
+  Object.assign(process.env, {
+    NODE_ENV: "test",
+    PORT: "8000",
+    FRONTEND_URL: "http://localhost:3000",
+    BACKEND_URL: "http://localhost:8000",
+    DATABASE_URI: "mongodb://127.0.0.1:27017/mern-backend-starter-test",
+    JWT_SECRET_KEY: "test_jwt_secret_key",
+    JWT_SHORT_EXPIRY: "15m",
+    JWT_LONG_EXPIRY: "7d",
+    COOKIE_NAME: "access_token",
+    COOKIE_HTTP_ONLY: "true",
+    COOKIE_SAME_SITE: "lax",
+    COOKIE_PATH: "/",
+    COOKIE_SHORT_EXPIRY: "900000",
+    COOKIE_LONG_EXPIRY: "604800000",
+    EMAIL_HOST: "smtp.example.com",
+    EMAIL_SERVICE: "example",
+    EMAIL_PORT: "587",
+    USER_EMAIL: "test@example.com",
+    USER_PASSWORD: "test_password",
+    CLOUDINARY_CLOUD_NAME: "test_cloud_name",
+    CLOUDINARY_API_KEY: "test_api_key",
+    CLOUDINARY_API_SECRET: "test_api_secret",
+  });
+};

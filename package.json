@@ -1,0 +1,56 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "ISC",
+  "main": "src/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js",
+    "format": "prettier --write \"./**/*.{js,jsx,html,yaml,env,md,json,txt}\"",
+    "lint": "eslint \"./**/*.js\"",
+    "format:check": "prettier --check \"./**/*.{js,jsx,html,yaml,env,md,json,txt}\"",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.5.0",
+    "eslint": "^9.20.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.0"
+  },
+  "dependencies": {
+    "axios": "^1.8.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
+    "colors": "^1.4.0",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "envalid": "^8.1.1",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
+    "http-errors": "^2.0.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.6",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
+    "nodemailer": "^7.0.7",
+    "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0",
+    "xss-clean": "^0.1.4"
+  },
+  "imports": {
+    "#api/*": "./src/api/*",
+    "#config/*": "./src/config/*",
+    "#lib/*": "./src/lib/*",
+    "#middlewares/*": "./src/middlewares/*",
+    "#server/*": "./src/server/*"
+  }
+}

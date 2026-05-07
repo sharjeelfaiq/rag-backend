@@ -1,0 +1,725 @@
+tags:
+  - name: Health
+  - name: Auth
+  - name: Email
+  - name: OTP
+  - name: Users
+  - name: Notifications
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    ObjectId:
+      type: string
+      pattern: "^[0-9a-fA-F]{24}$"
+      example: "68872978782a7467070c8ec3"
+    Email:
+      type: string
+      format: email
+      example: "jane@example.com"
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request parameters"
+        stack:
+          type: string
+          example: "No stack trace available"
+    MessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "Operation completed successfully"
+    StatusMessageResponse:
+      type: object
+      properties:
+        status:
+          oneOf:
+            - type: string
+            - type: boolean
+          example: "success"
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+    User:
+      type: object
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        firstName:
+          type: string
+          minLength: 2
+          example: "Jane"
+        lastName:
+          type: string
+          minLength: 2
+          example: "Doe"
+        email:
+          $ref: "#/components/schemas/Email"
+        isEmailVerified:
+          type: boolean
+          example: false
+        profilePicture:
+          type: string
+          nullable: true
+          example: "https://res.cloudinary.com/demo/image/upload/avatar.jpg"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Notification:
+      type: object
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        user:
+          $ref: "#/components/schemas/ObjectId"
+        message:
+          type: string
+          maxLength: 500
+          example: "Your profile was updated."
+        read:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SignupRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          example: "Jane"
+        lastName:
+          type: string
+          minLength: 2
+          example: "Doe"
+        email:
+          $ref: "#/components/schemas/Email"
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "Pa$$w0rd!"
+    SigninRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          $ref: "#/components/schemas/Email"
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "Pa$$w0rd!"
+        isRemembered:
+          type: boolean
+          example: false
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          $ref: "#/components/schemas/Email"
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - password
+      properties:
+        token:
+          type: string
+          example: "password-reset-jwt"
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: "N3wPa$$word"
+    EmailRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          $ref: "#/components/schemas/Email"
+    OtpVerifyRequest:
+      type: object
+      required:
+        - email
+        - otp
+      properties:
+        email:
+          $ref: "#/components/schemas/Email"
+        otp:
+          type: string
+          example: "123456"
+    UserListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Users retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    UserResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "User retrieved successfully"
+        data:
+          $ref: "#/components/schemas/User"
+    SigninResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Sign-in successful"
+        data:
+          type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/ObjectId"
+            name:
+              type: string
+              example: "Jane Doe"
+    NotificationListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Notifications retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+    NotificationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Notification updated successfully"
+        data:
+          $ref: "#/components/schemas/Notification"
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "System operational"
+    DetailedHealthResponse:
+      allOf:
+        - $ref: "#/components/schemas/HealthResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                port:
+                  type: integer
+                  example: 8000
+                timestamp:
+                  type: string
+                  format: date-time
+                uptime:
+                  type: string
+                  example: "120s"
+                responseTime:
+                  type: string
+                  example: "5ms"
+                environment:
+                  type: string
+                  example: "Development"
+                memory:
+                  type: object
+                  properties:
+                    usage:
+                      type: string
+                      example: "42MB"
+                    status:
+                      type: string
+                      example: "normal"
+                database:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "healthy"
+                    responseTime:
+                      type: string
+                      nullable: true
+                      example: "2ms"
+                urls:
+                  type: object
+                  properties:
+                    backend:
+                      type: string
+                      format: uri
+                    frontend:
+                      type: string
+                      format: uri
+                configured:
+                  type: object
+                  properties:
+                    database:
+                      type: boolean
+                    jwt:
+                      type: boolean
+                    cloudinary:
+                      type: boolean
+                    email:
+                      type: boolean
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    NotificationId:
+      name: notiId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    VerificationToken:
+      name: verificationToken
+      in: path
+      required: true
+      schema:
+        type: string
+        example: "email-verification-jwt"
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Authentication cookie is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Authenticated user is not allowed to perform this action.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServiceUnavailable:
+      description: System degraded.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Check public system health
+      responses:
+        "200":
+          description: System is operational.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /health/details:
+    get:
+      tags: [Health]
+      summary: Check detailed system health
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Detailed system health.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailedHealthResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /api/v1/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: User registered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/auth/signin:
+    post:
+      tags: [Auth]
+      summary: Sign in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SigninRequest"
+      responses:
+        "200":
+          description: User signed in and access cookie is set.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "access_token=jwt; HttpOnly; Path=/"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SigninResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/auth/signout:
+    post:
+      tags: [Auth]
+      summary: Sign out and clear the access cookie
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: User signed out.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Send a password reset link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "200":
+          description: Password reset link sent.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusMessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/auth/reset-password:
+    patch:
+      tags: [Auth]
+      summary: Reset password with a token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Password reset.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusMessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/email/send-verification-email:
+    post:
+      tags: [Email]
+      summary: Send a verification email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+      responses:
+        "200":
+          description: Verification email sent.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/email/verify-email/{verificationToken}:
+    get:
+      tags: [Email]
+      summary: Verify an email address
+      parameters:
+        - $ref: "#/components/parameters/VerificationToken"
+      responses:
+        "200":
+          description: Email verified.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/otp/send:
+    post:
+      tags: [OTP]
+      summary: Send a password reset OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailRequest"
+      responses:
+        "200":
+          description: OTP sent.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusMessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/otp/verify:
+    post:
+      tags: [OTP]
+      summary: Verify a password reset OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpVerifyRequest"
+      responses:
+        "200":
+          description: OTP verified.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusMessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /api/v1/users:
+    get:
+      tags: [Users]
+      summary: List users
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Users retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get a user by ID
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: User retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [Users]
+      summary: Update a user
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  minLength: 2
+                  example: "Jane"
+                lastName:
+                  type: string
+                  minLength: 2
+                  example: "Doe"
+                email:
+                  $ref: "#/components/schemas/Email"
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: User updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags: [Users]
+      summary: Delete a user
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: User deleted. No response body.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/notifications/{userId}:
+    get:
+      tags: [Notifications]
+      summary: List notifications for a user
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserIdParam"
+      responses:
+        "200":
+          description: Notifications retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/notifications/{notiId}:
+    patch:
+      tags: [Notifications]
+      summary: Mark a notification as read
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/NotificationId"
+      responses:
+        "200":
+          description: Notification updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"

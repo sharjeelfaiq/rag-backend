@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification</title>
+    <style>
+      /* Base Styles */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f8fa;
+        color: #333;
+        text-align: center;
+        padding: 20px;
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      /* Container */
+      .container {
+        max-width: 600px;
+        background: white;
+        padding: 40px 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        margin: 40px auto;
+      }
+
+      /* Responsive container */
+      @media (max-width: 640px) {
+        .container {
+          padding: 30px 20px;
+          margin: 20px auto;
+        }
+      }
+
+      /* Logo Area */
+      .logo-area {
+        margin-bottom: 30px;
+      }
+
+      .logo {
+        width: 160px;
+        height: auto;
+      }
+
+      /* Heading */
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-size: 28px;
+        background: linear-gradient(to right, #3498db, #5766ce);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Message */
+      p {
+        font-size: 16px;
+        margin-bottom: 20px;
+        line-height: 1.7;
+        color: #4a4a4a;
+      }
+
+      /* Verify Button */
+      .verify-button {
+        text-decoration: none;
+        display: inline-block;
+        color: #ffffff;
+        background: linear-gradient(to right, #3498db, #5766ce);
+        padding: 16px 36px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        margin: 30px 0;
+        box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+      }
+
+      .verify-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(52, 152, 219, 0.5);
+      }
+
+      /* System Notice */
+      .system-notice {
+        background-color: #f8f9fa;
+        border-left: 4px solid #6c757d;
+        padding: 16px;
+        margin: 30px 0;
+        text-align: left;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      /* Link Container */
+      .link-container {
+        padding: 15px;
+        background-color: #f0f7ff;
+        border-radius: 8px;
+        margin: 20px 0;
+        word-break: break-all;
+      }
+
+      .verification-link {
+        color: #3498db;
+        font-size: 13px;
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: linear-gradient(to right, #e6e9ec, #3498db, #e6e9ec);
+        margin: 30px 0;
+        border: none;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+      }
+
+      .company-info {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-top: 25px;
+      }
+
+      .support-email {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .support-email:hover {
+        text-decoration: underline;
+      }
+
+      /* Social Links */
+      .social-links {
+        margin: 25px 0;
+      }
+
+      .social-icon {
+        display: inline-block;
+        margin: 0 8px;
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(to right, #3498db, #5766ce);
+        border-radius: 50%;
+        line-height: 36px;
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        transition: transform 0.3s ease;
+      }
+
+      .social-icon:hover {
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo-area">
+        <svg width="160" height="50" viewBox="0 0 160 50" class="logo">
+          <defs>
+            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color: #3498db" />
+              <stop offset="100%" style="stop-color: #5766ce" />
+            </linearGradient>
+          </defs>
+          <rect
+            width="160"
+            height="50"
+            fill="url(#logoGradient)"
+            rx="10"
+          ></rect>
+          <text
+            x="80"
+            y="32"
+            font-family="Arial"
+            font-size="20"
+            font-weight="bold"
+            fill="white"
+            text-anchor="middle"
+          >
+            App Service
+          </text>
+        </svg>
+      </div>
+
+      <h2>Verify Your Email Address</h2>
+
+      <p>Hello there!</p>
+
+      <p>
+        Thank you for joining App Service! To ensure the security of your
+        account and complete your registration, please verify your email address
+        by clicking the button below.
+      </p>
+
+      <a
+        href="${BACKEND_URL}/api/v1/email/verify-email/${verificationToken}"
+        class="verify-button"
+      >
+        Verify My Email
+      </a>
+
+      <div class="system-notice">
+        <strong>Automated Message:</strong> This is an automatically generated
+        email. Please do not reply directly to this message as the mailbox is
+        not monitored.
+      </div>
+
+      <p>
+        If the button above doesn't work, you can copy and paste the following
+        link into your browser:
+      </p>
+
+      <div class="link-container">
+        <span class="verification-link"
+          >${BACKEND_URL}/api/v1/email/verify-email/${verificationToken}</span
+        >
+      </div>
+
+      <hr class="divider" />
+
+      <p class="footer">
+        If you did not sign up for an App Service account, you can safely ignore
+        this email.
+      </p>
+
+      <p class="footer">
+        Need help? Contact our support team at
+        <a href="mailto:support@example.com" class="support-email"
+          >support@example.com</a
+        >
+      </p>
+
+      <div class="social-links">
+        <a href="#" class="social-icon">f</a>
+        <a href="#" class="social-icon">in</a>
+        <a href="#" class="social-icon">t</a>
+      </div>
+
+      <p class="company-info">App Service</p>
+      <p class="footer">© 2025 App Service. All rights reserved.</p>
+    </div>
+  </body>
+</html>

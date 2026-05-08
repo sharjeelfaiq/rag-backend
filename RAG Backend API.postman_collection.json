@@ -440,6 +440,253 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Ingestion",
+      "item": [
+        {
+          "name": "Create Ingestion Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "ingestion", "jobs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Ingestion Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "ingestion", "jobs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ingestion Job",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "ingestion", "jobs", "{{INGESTION_JOB_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retry Ingestion Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+              "host": ["{{BASE_URL}}"],
+              "path": [
+                "api",
+                "v1",
+                "ingestion",
+                "jobs",
+                "{{INGESTION_JOB_ID}}",
+                "retry"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AI Usage",
+      "item": [
+        {
+          "name": "List AI Usage",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/ai/usage",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "ai", "usage"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Create Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/conversations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "conversations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/conversations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "conversations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"user\",\n  \"content\": \"Summarize this document.\",\n  \"metadata\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+              "host": ["{{BASE_URL}}"],
+              "path": [
+                "api",
+                "v1",
+                "conversations",
+                "{{CONVERSATION_ID}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+              "host": ["{{BASE_URL}}"],
+              "path": [
+                "api",
+                "v1",
+                "conversations",
+                "{{CONVERSATION_ID}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "event": [
@@ -489,6 +736,21 @@
     {
       "key": "RESET_TOKEN",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "DOCUMENT_ID",
+      "value": "68872978782a7467070c8ec5",
+      "type": "string"
+    },
+    {
+      "key": "INGESTION_JOB_ID",
+      "value": "68872978782a7467070c8ec6",
+      "type": "string"
+    },
+    {
+      "key": "CONVERSATION_ID",
+      "value": "68872978782a7467070c8ec7",
       "type": "string"
     }
   ]

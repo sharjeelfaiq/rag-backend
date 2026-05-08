@@ -50,6 +50,7 @@
     "#lib/*": "./src/lib/*",
     "#middlewares/*": "./src/middlewares/*",
     "#server/*": "./src/server/*",
-    "#storage/*": "./src/storage/*"
+    "#storage/*": "./src/storage/*",
+    "#workers/*": "./src/workers/*"
   }
 }

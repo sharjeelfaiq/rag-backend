@@ -23,4 +23,16 @@ export const documentRepository = {
       _id: documentId,
       uploadedBy: userId,
     }).exec(),
+
+  updateIngestionStatus: ({ documentId, status, lastIngestionJob }) =>
+    DocumentModel.findByIdAndUpdate(
+      documentId,
+      {
+        $set: {
+          status,
+          ...(lastIngestionJob ? { lastIngestionJob } : {}),
+        },
+      },
+      { new: true, runValidators: true },
+    ).exec(),
 };

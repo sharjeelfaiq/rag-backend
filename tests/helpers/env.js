@@ -21,5 +21,7 @@ export const applyTestEnv = () => {
     USER_PASSWORD: "test_password",
     DOCUMENT_STORAGE_PROVIDER: "local",
     DOCUMENT_LOCAL_ROOT: "uploads/documents-test",
+    INGESTION_WORKER_ENABLED: "false",
+    INGESTION_WORKER_INTERVAL_MS: "5000",
   });
 };

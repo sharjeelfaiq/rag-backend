@@ -67,6 +67,11 @@ const DocumentSchema = new Schema(
       default: "uploaded",
       required: true,
     },
+    lastIngestionJob: {
+      type: mongoose.Types.ObjectId,
+      ref: "IngestionJob",
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -76,5 +81,6 @@ const DocumentSchema = new Schema(
 
 DocumentSchema.index({ uploadedBy: 1, checksumHash: 1 }, { unique: true });
 DocumentSchema.index({ uploadedBy: 1, createdAt: -1 });
+DocumentSchema.index({ status: 1, updatedAt: -1 });
 
 export const DocumentModel = model("Document", DocumentSchema);

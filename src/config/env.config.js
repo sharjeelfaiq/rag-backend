@@ -45,6 +45,15 @@ const validators = {
     default: "uploads/documents",
     desc: "Local document storage root",
   }),
+
+  INGESTION_WORKER_ENABLED: bool({
+    default: true,
+    desc: "Enable Mongo-backed ingestion worker polling",
+  }),
+  INGESTION_WORKER_INTERVAL_MS: str({
+    default: "5000",
+    desc: "Polling interval for the ingestion worker",
+  }),
 };
 
 export const env = cleanEnv(process.env, validators, {

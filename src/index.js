@@ -6,9 +6,10 @@ import { logger } from "#lib/logger.lib.js";
 import { app, httpServer } from "#server/app.js";
 import { handlePromise } from "#lib/promise.lib.js";
 import { connectDatabase } from "#lib/database.lib.js";
+import { ingestionWorker } from "#workers/ingestion.worker.js";
 import { applyGlobalMiddleware } from "#middlewares/global.middleware.js";
 
-const { PORT, BACKEND_URL, NODE_ENV } = env;
+const { PORT, BACKEND_URL, NODE_ENV, INGESTION_WORKER_ENABLED } = env;
 
 const getNetworkIP = () => {
   const nets = os.networkInterfaces();
@@ -35,6 +36,10 @@ handlePromise(async () => {
   await connectDatabase();
 
   applyGlobalMiddleware(app, router);
+
+  if (INGESTION_WORKER_ENABLED) {
+    ingestionWorker.start();
+  }
 
   app.get("/", (_req, res) => {
     res.json({ status: "OK" });

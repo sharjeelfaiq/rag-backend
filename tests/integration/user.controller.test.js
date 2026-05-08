@@ -38,7 +38,7 @@ test("userController.deleteMe deletes the authenticated user and sends 204", asy
   assert.equal(response.body, undefined);
 });
 
-test("userController.updateMe updates only the authenticated user", async () => {
+test("userController.updateMe updates only the authenticated user without files", async () => {
   const { userController } =
     await import("../../src/api/user/user.controller.js");
   const { userService } = await import("../../src/api/user/user.service.js");
@@ -56,10 +56,11 @@ test("userController.updateMe updates only the authenticated user", async () => 
     },
   };
 
-  userService.updateById = async (id, body, files) => {
+  userService.updateById = async (...args) => {
+    assert.equal(args.length, 2);
+    const [id, body] = args;
     assert.equal(id, "user-1");
     assert.deepEqual(body, { firstName: "Updated" });
-    assert.deepEqual(files, { avatar: [] });
     return { message: "User updated successfully" };
   };
 
@@ -69,7 +70,6 @@ test("userController.updateMe updates only the authenticated user", async () => 
         user: { id: "user-1" },
         params: { id: "other-user" },
         body: { firstName: "Updated" },
-        files: { avatar: [] },
       },
       response,
     );

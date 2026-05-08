@@ -40,10 +40,6 @@ const UserSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    profilePicture: {
-      type: String,
-      trim: true,
-    },
   },
   {
     timestamps: true,

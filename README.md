@@ -2,7 +2,7 @@
 
 ## Overview
 
-MERN Backend Starter is a Node.js and Express backend template using ES modules, MongoDB through Mongoose, feature-oriented API modules, centralized runtime configuration, Swagger documentation, email templates, cookie-based JWT authentication, file upload support through Cloudinary storage, and a small Node test suite.
+MERN Backend Starter is a Node.js and Express backend template using ES modules, MongoDB through Mongoose, feature-oriented API modules, centralized runtime configuration, Swagger documentation, email templates, cookie-based JWT authentication, RAG-ready document upload support, and a small Node test suite.
 
 This README reflects the current repository state, including known limitations and technical debt. It should be treated as the source of truth for local setup, available commands, architecture, and current production-readiness gaps.
 
@@ -10,13 +10,13 @@ This README reflects the current repository state, including known limitations a
 
 - Express 4 API server with versioned routes under `/api/v1`.
 - MongoDB connection through Mongoose.
-- Feature modules for auth, email verification, OTP, health, notifications, and users.
+- Feature modules for auth, documents, email verification, OTP, health, notifications, and users.
 - Layered route -> controller -> service -> repository -> model flow for most modules.
 - JWT authentication stored in an HTTP cookie.
 - Role guard middleware for selected protected routes.
 - Joi request validation on selected auth routes.
 - Email delivery through Nodemailer and HTML templates in `src/views`.
-- Cloudinary-backed `multer` storage for avatar uploads.
+- RAG-ready document uploads with ownership checks, metadata tracking, SHA-256 checksums, lifecycle status, and pluggable storage adapters.
 - Swagger UI mounted at `/api-docs`.
 - Postman collection included in `Generic Backend API.postman_collection.json`.
 - ESLint, Prettier, and Node's built-in test runner.
@@ -33,7 +33,7 @@ Current limitations are documented in [Known Issues](#known-issues).
 - Authentication: JSON Web Tokens and cookie-parser
 - Password hashing: bcryptjs
 - Email: Nodemailer
-- Uploads: multer, multer-storage-cloudinary, Cloudinary
+- Uploads: multer with local document storage by default and an S3-ready adapter boundary
 - Logging: Winston and Morgan
 - API docs: swagger-jsdoc and swagger-ui-express
 - Testing: `node:test` and `node:assert`
@@ -56,6 +56,7 @@ Installed but not currently applied in global middleware:
     api/
       index.js                     # Root API router and /api/v1 route mounting
       auth/                        # Signup, signin, signout, password reset
+      document/                    # Owned document upload/list/read/delete flows
       email/                       # Verification email send/verify flows
       health/                      # Basic and detailed health checks
       notification/                # Notification list/update feature
@@ -65,7 +66,8 @@ Installed but not currently applied in global middleware:
       env.config.js                # Validated environment configuration
       swagger.config.js            # Swagger/OpenAPI configuration
     lib/                           # Shared helpers: database, tokens, cookies, email, files, logging
-    middlewares/                   # Global, auth, upload, and validation middleware
+    storage/                       # Document storage adapters and storage service factory
+    middlewares/                   # Global, auth, and validation middleware
     server/
       app.js                       # Express and HTTP server instances
       sockets.js                   # Socket.IO setup module, currently not imported by bootstrap
@@ -110,7 +112,6 @@ Known deviations:
 - npm.
 - A running MongoDB instance.
 - SMTP credentials for email flows.
-- Cloudinary account credentials for avatar upload flows.
 - Optional: Postman or another API client.
 
 ## Installation
@@ -140,30 +141,29 @@ Copy-Item .env.example .env
 
 Environment variables are loaded by `dotenv` and validated in `src/config/env.config.js` with `envalid`.
 
-| Variable                | Current validator | Expected value                                                             | Example                                          |
-| ----------------------- | ----------------- | -------------------------------------------------------------------------- | ------------------------------------------------ |
-| `NODE_ENV`              | string enum       | `development`, `test`, or `production`                                     | `development`                                    |
-| `PORT`                  | port              | HTTP port                                                                  | `8000`                                           |
-| `FRONTEND_URL`          | url               | Frontend application URL                                                   | `http://localhost:3000`                          |
-| `BACKEND_URL`           | url               | Backend base URL                                                           | `http://localhost:8000`                          |
-| `DATABASE_URI`          | string            | MongoDB connection string                                                  | `mongodb://127.0.0.1:27017/mern-backend-starter` |
-| `JWT_SECRET_KEY`        | string            | JWT signing secret                                                         | `change_me`                                      |
-| `JWT_SHORT_EXPIRY`      | string            | Short JWT expiry accepted by `jsonwebtoken`                                | `15m`                                            |
-| `JWT_LONG_EXPIRY`       | string            | Long JWT expiry accepted by `jsonwebtoken`                                 | `7d`                                             |
-| `COOKIE_NAME`           | string            | Auth cookie name                                                           | `access_token`                                   |
-| `COOKIE_HTTP_ONLY`      | boolean           | Whether cookie is HTTP-only                                                | `true`                                           |
-| `COOKIE_SAME_SITE`      | string enum       | `strict`, `lax`, or `none`                                                 | `lax`                                            |
-| `COOKIE_PATH`           | string            | Cookie path                                                                | `/`                                              |
-| `COOKIE_SHORT_EXPIRY`   | string            | Milliseconds used as cookie `maxAge`                                       | `900000`                                         |
-| `COOKIE_LONG_EXPIRY`    | string            | Milliseconds used as cookie `maxAge`                                       | `604800000`                                      |
-| `EMAIL_HOST`            | string            | SMTP host                                                                  | `smtp.example.com`                               |
-| `EMAIL_SERVICE`         | string            | Email service label; currently validated but not used by transporter setup | `example`                                        |
-| `EMAIL_PORT`            | port              | SMTP port                                                                  | `587`                                            |
-| `USER_EMAIL`            | string            | SMTP username/from address                                                 | `dummy@example.com`                              |
-| `USER_PASSWORD`         | string            | SMTP password                                                              | `dummy_email_password`                           |
-| `CLOUDINARY_CLOUD_NAME` | string            | Cloudinary cloud name                                                      | `dummy_cloud_name`                               |
-| `CLOUDINARY_API_KEY`    | string            | Cloudinary API key                                                         | `dummy_api_key`                                  |
-| `CLOUDINARY_API_SECRET` | string            | Cloudinary API secret                                                      | `dummy_api_secret`                               |
+| Variable                    | Current validator | Expected value                                                                   | Example                                          |
+| --------------------------- | ----------------- | -------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `NODE_ENV`                  | string enum       | `development`, `test`, or `production`                                           | `development`                                    |
+| `PORT`                      | port              | HTTP port                                                                        | `8000`                                           |
+| `FRONTEND_URL`              | url               | Frontend application URL                                                         | `http://localhost:3000`                          |
+| `BACKEND_URL`               | url               | Backend base URL                                                                 | `http://localhost:8000`                          |
+| `DATABASE_URI`              | string            | MongoDB connection string                                                        | `mongodb://127.0.0.1:27017/mern-backend-starter` |
+| `JWT_SECRET_KEY`            | string            | JWT signing secret                                                               | `change_me`                                      |
+| `JWT_SHORT_EXPIRY`          | string            | Short JWT expiry accepted by `jsonwebtoken`                                      | `15m`                                            |
+| `JWT_LONG_EXPIRY`           | string            | Long JWT expiry accepted by `jsonwebtoken`                                       | `7d`                                             |
+| `COOKIE_NAME`               | string            | Auth cookie name                                                                 | `access_token`                                   |
+| `COOKIE_HTTP_ONLY`          | boolean           | Whether cookie is HTTP-only                                                      | `true`                                           |
+| `COOKIE_SAME_SITE`          | string enum       | `strict`, `lax`, or `none`                                                       | `lax`                                            |
+| `COOKIE_PATH`               | string            | Cookie path                                                                      | `/`                                              |
+| `COOKIE_SHORT_EXPIRY`       | string            | Milliseconds used as cookie `maxAge`                                             | `900000`                                         |
+| `COOKIE_LONG_EXPIRY`        | string            | Milliseconds used as cookie `maxAge`                                             | `604800000`                                      |
+| `EMAIL_HOST`                | string            | SMTP host                                                                        | `smtp.example.com`                               |
+| `EMAIL_SERVICE`             | string            | Email service label; currently validated but not used by transporter setup       | `example`                                        |
+| `EMAIL_PORT`                | port              | SMTP port                                                                        | `587`                                            |
+| `USER_EMAIL`                | string            | SMTP username/from address                                                       | `dummy@example.com`                              |
+| `USER_PASSWORD`             | string            | SMTP password                                                                    | `dummy_email_password`                           |
+| `DOCUMENT_STORAGE_PROVIDER` | string enum       | `local` or `s3`; `local` is implemented as the default document storage provider | `local`                                          |
+| `DOCUMENT_LOCAL_ROOT`       | string            | Local filesystem root for uploaded documents                                     | `uploads/documents`                              |
 
 Important notes:
 
@@ -233,6 +233,7 @@ Implemented route groups:
 - `GET /health`
 - `GET /health/details`
 - `/api/v1/auth`
+- `/api/v1/documents`
 - `/api/v1/email`
 - `/api/v1/otp`
 - `/api/v1/users/me`
@@ -263,7 +264,7 @@ Security gaps to address before production:
 - Cookie `maxAge` is removed on sign-in, so configured cookie duration is not enforced.
 - Sign-out validates the token but does not maintain a token denylist; JWTs remain valid until expiry unless the client removes the cookie.
 - CSRF protection is not implemented.
-- Upload handling should validate file type and ownership before storing assets.
+- Document upload handling validates ownership, extension, MIME type, content signature, size, and checksum before storing metadata.
 
 ## Known Issues
 
@@ -276,7 +277,6 @@ Security gaps to address before production:
 - Model naming is inconsistent across `users`, `otps`, and `Notification`.
 - `src/server/sockets.js` exports a Socket.IO instance, but nothing imports it during startup.
 - `src/lib/file.lib.js` uses synchronous filesystem operations.
-- `userService.updateById` attempts to delete old profile pictures from a local `public` path even though uploads use Cloudinary and no `public/` folder exists.
 - Health service accesses Mongoose directly.
 - Test coverage is present but limited.
 
@@ -312,7 +312,7 @@ Current test limitations:
 - Tests use Node's built-in test runner and manual mocks.
 - There is no full database integration test harness.
 - There is no authentication flow test that signs up, verifies, signs in, and accesses protected routes end to end.
-- There is no upload test coverage.
+- Upload test coverage is focused on document validation, checksum, ownership, service orchestration, and route shape.
 - There is no socket test coverage.
 - There is no CI configuration in the repository.
 
@@ -323,7 +323,7 @@ No deployment configuration is currently included.
 Before deploying:
 
 - Set `NODE_ENV=production`.
-- Use production MongoDB, SMTP, Cloudinary, frontend, and backend values.
+- Use production MongoDB, SMTP, document storage, frontend, and backend values.
 - Replace dummy secrets from `.env.example`.
 - Restrict CORS origins.
 - Apply production security middleware.

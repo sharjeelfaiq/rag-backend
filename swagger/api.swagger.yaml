@@ -3,6 +3,7 @@ tags:
   - name: Auth
   - name: Email
   - name: OTP
+  - name: Documents
   - name: Users
   - name: Notifications
 components:
@@ -75,10 +76,6 @@ components:
         isEmailVerified:
           type: boolean
           example: false
-        profilePicture:
-          type: string
-          nullable: true
-          example: "https://res.cloudinary.com/demo/image/upload/avatar.jpg"
         createdAt:
           type: string
           format: date-time
@@ -99,6 +96,51 @@ components:
         read:
           type: boolean
           example: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Document:
+      type: object
+      properties:
+        _id:
+          $ref: "#/components/schemas/ObjectId"
+        originalFileName:
+          type: string
+          example: "handbook.pdf"
+        storedFileName:
+          type: string
+          example: "bd063b78b85fd662-550e8400-e29b-41d4-a716-446655440000.pdf"
+        fileType:
+          type: string
+          enum: [pdf, docx, txt, md]
+          example: "pdf"
+        fileSize:
+          type: integer
+          example: 1048576
+        uploadedBy:
+          $ref: "#/components/schemas/ObjectId"
+        uploadTimestamp:
+          type: string
+          format: date-time
+        storageProvider:
+          type: string
+          example: "local"
+        storageKey:
+          type: string
+          example: "68872978782a7467070c8ec3/bd063b78b85fd662-550e8400-e29b-41d4-a716-446655440000.pdf"
+        checksumHash:
+          type: string
+          example: "bd063b78b85fd662be1d30c15a7213a370576f1cbb5cc9c48adc67cd06d19961"
+        status:
+          type: string
+          enum: [uploaded, processing, processed, failed]
+          example: "uploaded"
+        fileUrl:
+          type: string
+          format: uri
         createdAt:
           type: string
           format: date-time
@@ -239,6 +281,30 @@ components:
           example: "Notification updated successfully"
         data:
           $ref: "#/components/schemas/Notification"
+    DocumentListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Documents retrieved successfully"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Document"
+    DocumentResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Document retrieved successfully"
+        data:
+          $ref: "#/components/schemas/Document"
     HealthResponse:
       type: object
       properties:
@@ -306,13 +372,19 @@ components:
                       type: boolean
                     jwt:
                       type: boolean
-                    cloudinary:
+                    documentStorage:
                       type: boolean
                     email:
                       type: boolean
   parameters:
     NotificationId:
       name: notiId
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ObjectId"
+    DocumentId:
+      name: id
       in: path
       required: true
       schema:
@@ -606,7 +678,7 @@ paths:
         - cookieAuth: []
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
@@ -620,9 +692,6 @@ paths:
                   example: "Doe"
                 email:
                   $ref: "#/components/schemas/Email"
-                avatar:
-                  type: string
-                  format: binary
       responses:
         "200":
           description: User updated.
@@ -644,6 +713,96 @@ paths:
       responses:
         "204":
           description: User deleted. No response body.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/documents/upload:
+    post:
+      tags: [Documents]
+      summary: Upload a RAG ingestion document
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - document
+              properties:
+                document:
+                  type: string
+                  format: binary
+                  description: PDF, DOCX, TXT, or Markdown file up to 20MB.
+      responses:
+        "201":
+          description: Document uploaded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Duplicate document for the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: File exceeds 20MB.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/documents:
+    get:
+      tags: [Documents]
+      summary: List documents uploaded by the authenticated user
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Documents retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/documents/{id}:
+    get:
+      tags: [Documents]
+      summary: Get owned document metadata
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: Document retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Documents]
+      summary: Delete an owned document
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "204":
+          description: Document deleted. No response body.
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":

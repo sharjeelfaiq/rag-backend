@@ -19,8 +19,7 @@ export const applyTestEnv = () => {
     EMAIL_PORT: "587",
     USER_EMAIL: "test@example.com",
     USER_PASSWORD: "test_password",
-    CLOUDINARY_CLOUD_NAME: "test_cloud_name",
-    CLOUDINARY_API_KEY: "test_api_key",
-    CLOUDINARY_API_SECRET: "test_api_secret",
+    DOCUMENT_STORAGE_PROVIDER: "local",
+    DOCUMENT_LOCAL_ROOT: "uploads/documents-test",
   });
 };

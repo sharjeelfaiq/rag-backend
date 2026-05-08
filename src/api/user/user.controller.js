@@ -8,11 +8,7 @@ export const userController = {
   }),
 
   updateMe: handlePromise(async (req, res) => {
-    const responseBody = await userService.updateById(
-      req.user.id,
-      req.body,
-      req.files,
-    );
+    const responseBody = await userService.updateById(req.user.id, req.body);
     res.status(200).json(responseBody);
   }),
 

@@ -12,9 +12,8 @@ const {
   DATABASE_URI,
   USER_PASSWORD,
   JWT_SECRET_KEY,
-  CLOUDINARY_API_KEY,
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_API_SECRET,
+  DOCUMENT_LOCAL_ROOT,
+  DOCUMENT_STORAGE_PROVIDER,
 } = env;
 
 export const healthService = {
@@ -98,10 +97,9 @@ export const healthService = {
       configured: {
         database: !!DATABASE_URI,
         jwt: !!JWT_SECRET_KEY,
-        cloudinary: !!(
-          CLOUDINARY_CLOUD_NAME &&
-          CLOUDINARY_API_KEY &&
-          CLOUDINARY_API_SECRET
+        documentStorage: !!(
+          DOCUMENT_STORAGE_PROVIDER &&
+          (DOCUMENT_STORAGE_PROVIDER !== "local" || DOCUMENT_LOCAL_ROOT)
         ),
         email: !!(USER_EMAIL && USER_PASSWORD),
       },

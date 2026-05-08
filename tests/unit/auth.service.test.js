@@ -107,8 +107,7 @@ test("authService.signin rejects missing username credentials", async () => {
           password: "secure-password",
         }),
       (error) =>
-        error.status === 401 &&
-        error.message === "Invalid email or password.",
+        error.status === 401 && error.message === "Invalid email or password.",
     );
   } finally {
     userRepository.findUserByEmailOrUsername =

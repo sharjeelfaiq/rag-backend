@@ -28,3 +28,15 @@ test("notification routes do not accept a user id path parameter", async () => {
     { path: "/:notiId", methods: ["patch"] },
   ]);
 });
+
+test("document routes do not accept a user id path parameter", async () => {
+  const { documentRoutes } =
+    await import("../../src/api/document/document.routes.js");
+
+  assert.deepEqual(collectRoutes(documentRoutes), [
+    { path: "/upload", methods: ["post"] },
+    { path: "/", methods: ["get"] },
+    { path: "/:id", methods: ["get"] },
+    { path: "/:id", methods: ["delete"] },
+  ]);
+});

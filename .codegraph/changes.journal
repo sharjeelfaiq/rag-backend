@@ -1,4 +1,4 @@
-# codegraph-journal v1 1778226354916
+# codegraph-journal v1 1778228770371
 src/app.js
 src/config/env.config.js
 src/lib/database.lib.js
@@ -50,3 +50,22 @@ tests/integration/user.controller.test.js
 tests/unit/auth.middleware.test.js
 tests/unit/notification.service.test.js
 tests/unit/ownership.routes.test.js
+tests/unit/document.model.test.js
+tests/unit/document.routes.test.js
+tests/unit/document.service.test.js
+tests/unit/document.validation.test.js
+src/api/document/document.controller.js
+src/api/document/document.model.js
+src/api/document/document.repository.js
+src/api/document/document.routes.js
+src/api/document/document.service.js
+src/api/document/document.upload.middleware.js
+src/api/document/document.validation.js
+src/storage/local-storage.adapter.js
+src/storage/s3-storage.adapter.js
+src/storage/storage.service.js
+src/api/index.js
+src/config/env.config.js
+tests/unit/document.validation.test.js
+tests/integration/user.controller.test.js
+tests/integration/user.controller.test.js

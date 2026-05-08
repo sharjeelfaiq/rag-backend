@@ -36,9 +36,15 @@ const validators = {
   USER_EMAIL: str(),
   USER_PASSWORD: str(),
 
-  CLOUDINARY_CLOUD_NAME: str({ desc: "Cloudinary cloud name" }),
-  CLOUDINARY_API_KEY: str({ desc: "Cloudinary API key" }),
-  CLOUDINARY_API_SECRET: str({ desc: "Cloudinary API secret" }),
+  DOCUMENT_STORAGE_PROVIDER: str({
+    choices: ["local", "s3"],
+    default: "local",
+    desc: "Document storage provider",
+  }),
+  DOCUMENT_LOCAL_ROOT: str({
+    default: "uploads/documents",
+    desc: "Local document storage root",
+  }),
 };
 
 export const env = cleanEnv(process.env, validators, {

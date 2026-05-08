@@ -16,15 +16,6 @@ const getUploadedProfilePicture = (files) => {
 };
 
 export const userService = {
-  getAll: async () => {
-    const users = await userRepository.findAllUsers();
-    if (!users.length) throw createError(404, "Users not found");
-    return {
-      message: "Users retrieved successfully",
-      data: users,
-    };
-  },
-
   getById: async ({ id }) => {
     const user = await userRepository.findUserById(id);
     if (!user) throw createError(404, "User not found");

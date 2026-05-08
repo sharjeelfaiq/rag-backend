@@ -10,8 +10,6 @@ export const userRepository = {
       ...(username ? { username } : {}),
     }),
 
-  findAllUsers: () => UserModel.find().select("-password"),
-
   findUserByEmail: (email) => UserModel.findOne({ email }),
 
   findUserByEmailOrUsername: ({ email, username }) => {
@@ -36,11 +34,7 @@ export const userRepository = {
     }),
 
   updateUserPasswordByEmail: (email, password) =>
-    UserModel.findOneAndUpdate(
-      { email },
-      { password },
-      { new: true },
-    ),
+    UserModel.findOneAndUpdate({ email }, { password }, { new: true }),
 
   deleteUserById: (id) => UserModel.findByIdAndDelete(id),
 };

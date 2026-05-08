@@ -235,8 +235,8 @@ Implemented route groups:
 - `/api/v1/auth`
 - `/api/v1/email`
 - `/api/v1/otp`
-- `/api/v1/users`
-- `/api/v1/notifications`
+- `/api/v1/users/me`
+- `/api/v1/notifications/me`
 
 Protected route groups use the `verifyAccessToken` middleware where mounted in `src/api/index.js`.
 
@@ -245,8 +245,10 @@ Protected route groups use the `verifyAccessToken` middleware where mounted in `
 Current security behavior:
 
 - JWTs are signed with `JWT_SECRET_KEY`.
+- JWT access tokens carry only the authenticated user `id`.
 - Auth token is stored in a cookie named by `COOKIE_NAME`.
 - Cookie options are centralized in `src/lib/cookie.lib.js`.
+- Authorization is ownership-based only: protected user and notification routes use `req.user.id` and do not implement roles or elevated privileges.
 - Passwords are hashed with bcryptjs.
 - CORS is enabled globally.
 - Request body parsing is enabled globally.

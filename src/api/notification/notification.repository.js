@@ -14,9 +14,9 @@ export const notificationRepository = {
     });
   },
 
-  updateReadStatus: ({ notificationId, read }) => {
-    return NotificationModel.findByIdAndUpdate(
-      notificationId,
+  updateReadStatusForUser: ({ notificationId, userId, read }) => {
+    return NotificationModel.findOneAndUpdate(
+      { _id: notificationId, user: userId },
       { $set: { read } },
       { new: true, runValidators: true },
     ).exec();

@@ -311,18 +311,6 @@ components:
                     email:
                       type: boolean
   parameters:
-    UserId:
-      name: id
-      in: path
-      required: true
-      schema:
-        $ref: "#/components/schemas/ObjectId"
-    UserIdParam:
-      name: userId
-      in: path
-      required: true
-      schema:
-        $ref: "#/components/schemas/ObjectId"
     NotificationId:
       name: notiId
       in: path
@@ -594,31 +582,12 @@ paths:
                 $ref: "#/components/schemas/StatusMessageResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
-  /api/v1/users:
+  /api/v1/users/me:
     get:
       tags: [Users]
-      summary: List users
+      summary: Get the authenticated user
       security:
         - cookieAuth: []
-      responses:
-        "200":
-          description: Users retrieved.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserListResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-  /api/v1/users/{id}:
-    get:
-      tags: [Users]
-      summary: Get a user by ID
-      security:
-        - cookieAuth: []
-      parameters:
-        - $ref: "#/components/parameters/UserId"
       responses:
         "200":
           description: User retrieved.
@@ -632,11 +601,9 @@ paths:
           $ref: "#/components/responses/NotFound"
     patch:
       tags: [Users]
-      summary: Update a user
+      summary: Update the authenticated user
       security:
         - cookieAuth: []
-      parameters:
-        - $ref: "#/components/parameters/UserId"
       requestBody:
         content:
           multipart/form-data:
@@ -671,28 +638,22 @@ paths:
           $ref: "#/components/responses/InternalServerError"
     delete:
       tags: [Users]
-      summary: Delete a user
+      summary: Delete the authenticated user
       security:
         - cookieAuth: []
-      parameters:
-        - $ref: "#/components/parameters/UserId"
       responses:
         "204":
           description: User deleted. No response body.
         "401":
           $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
-  /api/v1/notifications/{userId}:
+  /api/v1/notifications/me:
     get:
       tags: [Notifications]
-      summary: List notifications for a user
+      summary: List notifications for the authenticated user
       security:
         - cookieAuth: []
-      parameters:
-        - $ref: "#/components/parameters/UserIdParam"
       responses:
         "200":
           description: Notifications retrieved.
@@ -721,5 +682,7 @@ paths:
                 $ref: "#/components/schemas/NotificationResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServerError"

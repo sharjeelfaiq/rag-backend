@@ -2,9 +2,7 @@ import { notificationRepository } from "./notification.repository.js";
 import createError from "http-errors";
 
 export const notificationService = {
-  getNotificationsByUserId: async (requestParams) => {
-    const { userId } = requestParams;
-
+  getMyNotifications: async (userId) => {
     const userNotifications = await notificationRepository.getByUserId(userId);
 
     if (!userNotifications) {
@@ -18,16 +16,16 @@ export const notificationService = {
     };
   },
 
-  updateNotificationById: async (requestParams) => {
-    const { notiId } = requestParams;
-
-    const updatedNotification = await notificationRepository.updateReadStatus({
-      notificationId: notiId,
-      read: true,
-    });
+  updateNotificationById: async (notificationId, userId) => {
+    const updatedNotification =
+      await notificationRepository.updateReadStatusForUser({
+        notificationId,
+        userId,
+        read: true,
+      });
 
     if (!updatedNotification) {
-      throw createError(500, "Notification update failed");
+      throw createError(404, "Notification not found");
     }
 
     return {

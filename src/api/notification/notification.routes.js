@@ -5,5 +5,5 @@ import { notificationController } from "./notification.controller.js";
 export const notificationRoutes = express.Router();
 
 notificationRoutes
-  .get("/:userId", notificationController.getNotificationsByUserId)
+  .get("/me", notificationController.getMyNotifications)
   .patch("/:notiId", notificationController.updateNotificationById);

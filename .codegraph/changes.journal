@@ -1,4 +1,4 @@
-# codegraph-journal v1 1778115706105
+# codegraph-journal v1 1778226354916
 src/app.js
 src/config/env.config.js
 src/lib/database.lib.js
@@ -22,3 +22,31 @@ tests/unit/mongoose.models.test.js
 src/api/user/user.model.js
 src/api/otp/otp.model.js
 src/api/notification/notification.model.js
+tests/unit/auth.middleware.test.js
+tests/integration/user.controller.test.js
+tests/unit/notification.service.test.js
+tests/unit/notification.repository.test.js
+src/middlewares/auth.middleware.js
+src/api/user/user.routes.js
+src/api/user/user.controller.js
+src/api/notification/notification.routes.js
+src/api/notification/notification.controller.js
+src/api/notification/notification.service.js
+src/api/notification/notification.service.js
+src/api/notification/notification.repository.js
+src/lib/cloudinary.lib.js
+src/api/user/user.service.js
+src/api/user/user.repository.js
+src/api/notification/notification.controller.js
+src/api/notification/notification.repository.js
+src/api/notification/notification.routes.js
+src/api/notification/notification.service.js
+src/api/user/user.controller.js
+src/api/user/user.repository.js
+src/api/user/user.service.js
+src/lib/cloudinary.lib.js
+src/middlewares/auth.middleware.js
+tests/integration/user.controller.test.js
+tests/unit/auth.middleware.test.js
+tests/unit/notification.service.test.js
+tests/unit/ownership.routes.test.js

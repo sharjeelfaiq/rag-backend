@@ -17,7 +17,7 @@ export const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: (request, file) => {
     const fileType = file.fieldname;
-    const userId = request.body.user;
+    const userId = request.user?.id;
     const fileExtension = path.extname(file.originalname).substring(1);
 
     const fields = ["avatar"];

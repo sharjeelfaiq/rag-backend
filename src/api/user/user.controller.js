@@ -2,26 +2,22 @@ import { handlePromise } from "#lib/promise.lib.js";
 import { userService } from "./user.service.js";
 
 export const userController = {
-  getAll: handlePromise(async (_, res) => {
-    const responseBody = await userService.getAll();
+  getMe: handlePromise(async (req, res) => {
+    const responseBody = await userService.getById({ id: req.user.id });
     res.status(200).json(responseBody);
   }),
 
-  getById: handlePromise(async (req, res) => {
-    const parameters = req.params;
-    const responseBody = await userService.getById(parameters);
+  updateMe: handlePromise(async (req, res) => {
+    const responseBody = await userService.updateById(
+      req.user.id,
+      req.body,
+      req.files,
+    );
     res.status(200).json(responseBody);
   }),
 
-  updateById: handlePromise(async (req, res) => {
-    const { id } = req.params;
-    const responseBody = await userService.updateById(id, req.body, req.files);
-    res.status(200).json(responseBody);
-  }),
-
-  deleteById: handlePromise(async (req, res) => {
-    const { id } = req.params;
-    await userService.deleteById(id);
+  deleteMe: handlePromise(async (req, res) => {
+    await userService.deleteById(req.user.id);
     res.status(204).send();
   }),
 };

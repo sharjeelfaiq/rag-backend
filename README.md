@@ -160,7 +160,7 @@ Environment variables are loaded by `dotenv` and validated in `src/config/env.co
 | `EMAIL_HOST`                | string            | SMTP host                                                                        | `smtp.example.com`                               |
 | `EMAIL_SERVICE`             | string            | Email service label; currently validated but not used by transporter setup       | `example`                                        |
 | `EMAIL_PORT`                | port              | SMTP port                                                                        | `587`                                            |
-| `USER_EMAIL`                | string            | SMTP username/from address                                                       | `dummy@example.com`                              |
+| `USER_EMAIL`                | string            | SMTP account/from address                                                        | `dummy@example.com`                              |
 | `USER_PASSWORD`             | string            | SMTP password                                                                    | `dummy_email_password`                           |
 | `DOCUMENT_STORAGE_PROVIDER` | string enum       | `local` or `s3`; `local` is implemented as the default document storage provider | `local`                                          |
 | `DOCUMENT_LOCAL_ROOT`       | string            | Local filesystem root for uploaded documents                                     | `uploads/documents`                              |
@@ -268,8 +268,6 @@ Security gaps to address before production:
 
 ## Known Issues
 
-- `signinDto` allows `username`, but `authService.signin` only looks up users by `email`.
-- The user model does not define a `username` field.
 - `forgotPasswordDto` exists but is not wired to `/forgot-password`.
 - `/reset-password`, email routes, and OTP routes do not currently use DTO validation.
 - `userRepository.updateUserById`, `updateUserByEmail`, and `updateUserPasswordByEmail` use `upsert: true`.

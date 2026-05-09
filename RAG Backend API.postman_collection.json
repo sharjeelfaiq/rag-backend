@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "9f7e01f8-ecfd-4591-8e5e-71543f5abf74",
     "name": "RAG Backend API",
-    "description": "Runtime-aligned collection for the Express RAG backend API. Protected routes use the configured auth cookie rather than a Bearer token.",
+    "description": "Runtime-aligned collection for the Express RAG backend API. All requests resolve from {{BASE_URL}}; protected routes rely on the auth cookie stored by Postman's cookie jar after signin.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -76,13 +76,7 @@
           "name": "Check Detailed Health",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/health/details",
               "host": ["{{BASE_URL}}"],
@@ -95,13 +89,7 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/health/details",
                   "host": ["{{BASE_URL}}"],
@@ -125,13 +113,7 @@
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/health/details",
                   "host": ["{{BASE_URL}}"],
@@ -171,7 +153,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -183,7 +165,7 @@
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "signup"]
             },
-            "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required; username is optional."
+            "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required."
           },
           "response": [
             {
@@ -199,7 +181,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -211,7 +193,7 @@
                   "host": ["{{BASE_URL}}"],
                   "path": ["api", "v1", "auth", "signup"]
                 },
-                "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required; username is optional."
+                "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required."
               },
               "status": "Created",
               "code": 201,
@@ -238,7 +220,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -250,7 +232,7 @@
                   "host": ["{{BASE_URL}}"],
                   "path": ["api", "v1", "auth", "signup"]
                 },
-                "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required; username is optional."
+                "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required."
               },
               "status": "Bad Request",
               "code": 400,
@@ -279,7 +261,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"isRemembered\": false\n}",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\",\n  \"isRemembered\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -291,26 +273,8 @@
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "signin"]
             },
-            "description": "Signs in with either email or username plus password. The API sets the auth cookie and does not return the token in the JSON body."
+            "description": "Signs in with email plus password. The API sets the auth cookie and does not return the token in the JSON body."
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const setCookie = pm.response.headers.get('Set-Cookie');",
-                  "if (setCookie) {",
-                  "  const cookieName = pm.collectionVariables.get('COOKIE_NAME') || 'access_token';",
-                  "  const tokenMatch = setCookie.match(new RegExp(`${cookieName}=([^;]+)`));",
-                  "  if (tokenMatch) pm.collectionVariables.set('ACCESS_TOKEN', tokenMatch[1]);",
-                  "}",
-                  "const body = pm.response.json();",
-                  "if (body?.data?.id) pm.collectionVariables.set('USER_ID', body.data.id);"
-                ]
-              }
-            }
-          ],
           "response": [
             {
               "name": "Success",
@@ -325,7 +289,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"isRemembered\": false\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\",\n  \"isRemembered\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -337,7 +301,7 @@
                   "host": ["{{BASE_URL}}"],
                   "path": ["api", "v1", "auth", "signin"]
                 },
-                "description": "Signs in with either email or username plus password. The API sets the auth cookie and does not return the token in the JSON body."
+                "description": "Signs in with email plus password. The API sets the auth cookie and does not return the token in the JSON body."
               },
               "status": "OK",
               "code": 200,
@@ -364,7 +328,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"isRemembered\": false\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\",\n  \"isRemembered\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -376,7 +340,7 @@
                   "host": ["{{BASE_URL}}"],
                   "path": ["api", "v1", "auth", "signin"]
                 },
-                "description": "Signs in with either email or username plus password. The API sets the auth cookie and does not return the token in the JSON body."
+                "description": "Signs in with email plus password. The API sets the auth cookie and does not return the token in the JSON body."
               },
               "status": "Bad Request",
               "code": 400,
@@ -388,7 +352,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": 400,\n  \"message\": \"Validation failed: Either email or username is required.\"\n}"
+              "body": "{\n  \"status\": 400,\n  \"message\": \"Validation failed: Email is required.\"\n}"
             }
           ]
         },
@@ -396,13 +360,7 @@
           "name": "Signout",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/api/v1/auth/signout",
               "host": ["{{BASE_URL}}"],
@@ -410,27 +368,12 @@
             },
             "description": "Signs out using the configured auth cookie."
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": ["pm.collectionVariables.set('ACCESS_TOKEN', '');"]
-              }
-            }
-          ],
           "response": [
             {
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/auth/signout",
                   "host": ["{{BASE_URL}}"],
@@ -454,13 +397,7 @@
               "name": "400 Error",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/auth/signout",
                   "host": ["{{BASE_URL}}"],
@@ -495,7 +432,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+              "raw": "{\n  \"email\": \"jane@example.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -523,7 +460,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -562,7 +499,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -603,7 +540,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"{{NEW_PASSWORD}}\"\n}",
+              "raw": "{\n  \"token\": \"sample-reset-token\",\n  \"password\": \"N3wPa$$word\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -631,7 +568,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"{{NEW_PASSWORD}}\"\n}",
+                  "raw": "{\n  \"token\": \"sample-reset-token\",\n  \"password\": \"N3wPa$$word\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -670,7 +607,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"{{NEW_PASSWORD}}\"\n}",
+                  "raw": "{\n  \"token\": \"sample-reset-token\",\n  \"password\": \"N3wPa$$word\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -716,7 +653,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+              "raw": "{\n  \"email\": \"jane@example.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -744,7 +681,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -783,7 +720,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -817,14 +754,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/email/verify-email/{{VERIFICATION_TOKEN}}",
+              "raw": "{{BASE_URL}}/api/v1/email/verify-email/sample-verification-token",
               "host": ["{{BASE_URL}}"],
               "path": [
                 "api",
                 "v1",
                 "email",
                 "verify-email",
-                "{{VERIFICATION_TOKEN}}"
+                "sample-verification-token"
               ]
             },
             "description": "Verifies an email address with a verification token."
@@ -836,14 +773,14 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/email/verify-email/{{VERIFICATION_TOKEN}}",
+                  "raw": "{{BASE_URL}}/api/v1/email/verify-email/sample-verification-token",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "email",
                     "verify-email",
-                    "{{VERIFICATION_TOKEN}}"
+                    "sample-verification-token"
                   ]
                 },
                 "description": "Verifies an email address with a verification token."
@@ -866,14 +803,14 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/email/verify-email/{{VERIFICATION_TOKEN}}",
+                  "raw": "{{BASE_URL}}/api/v1/email/verify-email/sample-verification-token",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "email",
                     "verify-email",
-                    "{{VERIFICATION_TOKEN}}"
+                    "sample-verification-token"
                   ]
                 },
                 "description": "Verifies an email address with a verification token."
@@ -910,7 +847,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+              "raw": "{\n  \"email\": \"jane@example.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -938,7 +875,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -977,7 +914,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1018,7 +955,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"otp\": \"{{OTP_CODE}}\"\n}",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"otp\": \"123456\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1046,7 +983,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"otp\": \"{{OTP_CODE}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\",\n  \"otp\": \"123456\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1085,7 +1022,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"otp\": \"{{OTP_CODE}}\"\n}",
+                  "raw": "{\n  \"email\": \"jane@example.com\",\n  \"otp\": \"123456\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1122,13 +1059,7 @@
           "name": "Get Me",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/api/v1/users/me",
               "host": ["{{BASE_URL}}"],
@@ -1141,13 +1072,7 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/users/me",
                   "host": ["{{BASE_URL}}"],
@@ -1165,19 +1090,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"message\": \"User retrieved successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec3\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Doe\",\n    \"email\": \"{{USER_EMAIL}}\",\n    \"username\": \"{{USERNAME}}\",\n    \"isEmailVerified\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"message\": \"User retrieved successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec3\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Doe\",\n    \"email\": \"jane@example.com\",\n    \"isEmailVerified\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/users/me",
                   "host": ["{{BASE_URL}}"],
@@ -1205,11 +1124,6 @@
             "method": "PATCH",
             "header": [
               {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              },
-              {
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
@@ -1217,7 +1131,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"username\": \"{{USERNAME}}\"\n}",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1238,11 +1152,6 @@
                 "method": "PATCH",
                 "header": [
                   {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
-                  {
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
@@ -1250,7 +1159,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"username\": \"{{USERNAME}}\"\n}",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1274,18 +1183,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"message\": \"User updated successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec3\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Doe\",\n    \"email\": \"{{USER_EMAIL}}\",\n    \"username\": \"{{USERNAME}}\",\n    \"isEmailVerified\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"message\": \"User updated successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec3\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Doe\",\n    \"email\": \"jane@example.com\",\n    \"isEmailVerified\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "PATCH",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -1294,7 +1198,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"username\": \"{{USERNAME}}\"\n}",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1326,13 +1230,7 @@
           "name": "Delete Me",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/api/v1/users/me",
               "host": ["{{BASE_URL}}"],
@@ -1345,13 +1243,7 @@
               "name": "Success",
               "originalRequest": {
                 "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/users/me",
                   "host": ["{{BASE_URL}}"],
@@ -1375,13 +1267,7 @@
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/users/me",
                   "host": ["{{BASE_URL}}"],
@@ -1412,13 +1298,7 @@
           "name": "Upload Document",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
@@ -1436,30 +1316,12 @@
             },
             "description": "Uploads one document file in multipart/form-data field `document`. Allowed types: pdf, docx, txt, md. Maximum size: 20MB."
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "if (body?.data?._id) pm.collectionVariables.set('DOCUMENT_ID', body.data._id);"
-                ]
-              }
-            }
-          ],
           "response": [
             {
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "body": {
                   "mode": "formdata",
                   "formdata": [
@@ -1487,19 +1349,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Document uploaded successfully\",\n  \"data\": {\n    \"_id\": \"{{DOCUMENT_ID}}\",\n    \"originalFileName\": \"sample.txt\",\n    \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n    \"fileType\": \"txt\",\n    \"fileSize\": 128,\n    \"uploadedBy\": \"68872978782a7467070c8ec3\",\n    \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"storageProvider\": \"local\",\n    \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n    \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n    \"status\": \"uploaded\",\n    \"lastIngestionJob\": null,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n    \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Document uploaded successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec5\",\n    \"originalFileName\": \"sample.txt\",\n    \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n    \"fileType\": \"txt\",\n    \"fileSize\": 128,\n    \"uploadedBy\": \"68872978782a7467070c8ec3\",\n    \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"storageProvider\": \"local\",\n    \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n    \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n    \"status\": \"uploaded\",\n    \"lastIngestionJob\": null,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n    \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n  }\n}"
             },
             {
               "name": "400 Error",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "body": {
                   "mode": "formdata",
                   "formdata": [
@@ -1535,13 +1391,7 @@
           "name": "List Documents",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/api/v1/documents",
               "host": ["{{BASE_URL}}"],
@@ -1554,13 +1404,7 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/documents",
                   "host": ["{{BASE_URL}}"],
@@ -1578,19 +1422,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Documents retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{DOCUMENT_ID}}\",\n      \"originalFileName\": \"sample.txt\",\n      \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n      \"fileType\": \"txt\",\n      \"fileSize\": 128,\n      \"uploadedBy\": \"68872978782a7467070c8ec3\",\n      \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n      \"storageProvider\": \"local\",\n      \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n      \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n      \"status\": \"uploaded\",\n      \"lastIngestionJob\": null,\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n      \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Documents retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec5\",\n      \"originalFileName\": \"sample.txt\",\n      \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n      \"fileType\": \"txt\",\n      \"fileSize\": 128,\n      \"uploadedBy\": \"68872978782a7467070c8ec3\",\n      \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n      \"storageProvider\": \"local\",\n      \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n      \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n      \"status\": \"uploaded\",\n      \"lastIngestionJob\": null,\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n      \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/documents",
                   "host": ["{{BASE_URL}}"],
@@ -1616,17 +1454,11 @@
           "name": "Get Document",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/documents/68872978782a7467070c8ec5",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+              "path": ["api", "v1", "documents", "68872978782a7467070c8ec5"]
             },
             "description": "Returns one document owned by the authenticated user."
           },
@@ -1635,17 +1467,11 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/documents/68872978782a7467070c8ec5",
                   "host": ["{{BASE_URL}}"],
-                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                  "path": ["api", "v1", "documents", "68872978782a7467070c8ec5"]
                 },
                 "description": "Returns one document owned by the authenticated user."
               },
@@ -1659,23 +1485,17 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Document retrieved successfully\",\n  \"data\": {\n    \"_id\": \"{{DOCUMENT_ID}}\",\n    \"originalFileName\": \"sample.txt\",\n    \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n    \"fileType\": \"txt\",\n    \"fileSize\": 128,\n    \"uploadedBy\": \"68872978782a7467070c8ec3\",\n    \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"storageProvider\": \"local\",\n    \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n    \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n    \"status\": \"uploaded\",\n    \"lastIngestionJob\": null,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n    \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Document retrieved successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec5\",\n    \"originalFileName\": \"sample.txt\",\n    \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n    \"fileType\": \"txt\",\n    \"fileSize\": 128,\n    \"uploadedBy\": \"68872978782a7467070c8ec3\",\n    \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"storageProvider\": \"local\",\n    \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n    \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n    \"status\": \"uploaded\",\n    \"lastIngestionJob\": null,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n    \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/documents/68872978782a7467070c8ec5",
                   "host": ["{{BASE_URL}}"],
-                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                  "path": ["api", "v1", "documents", "68872978782a7467070c8ec5"]
                 },
                 "description": "Returns one document owned by the authenticated user."
               },
@@ -1697,17 +1517,11 @@
           "name": "Delete Document",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/documents/68872978782a7467070c8ec5",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+              "path": ["api", "v1", "documents", "68872978782a7467070c8ec5"]
             },
             "description": "Deletes one document owned by the authenticated user."
           },
@@ -1716,17 +1530,11 @@
               "name": "Success",
               "originalRequest": {
                 "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/documents/68872978782a7467070c8ec5",
                   "host": ["{{BASE_URL}}"],
-                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                  "path": ["api", "v1", "documents", "68872978782a7467070c8ec5"]
                 },
                 "description": "Deletes one document owned by the authenticated user."
               },
@@ -1746,17 +1554,11 @@
               "name": "404 Error",
               "originalRequest": {
                 "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/documents/68872978782a7467070c8ec5",
                   "host": ["{{BASE_URL}}"],
-                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                  "path": ["api", "v1", "documents", "68872978782a7467070c8ec5"]
                 },
                 "description": "Deletes one document owned by the authenticated user."
               },
@@ -1783,13 +1585,7 @@
           "name": "Get My Notifications",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/api/v1/notifications/me",
               "host": ["{{BASE_URL}}"],
@@ -1802,13 +1598,7 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/notifications/me",
                   "host": ["{{BASE_URL}}"],
@@ -1826,19 +1616,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Notifications retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{NOTIFICATION_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"message\": \"Document ingestion completed\",\n      \"read\": false,\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Notifications retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec4\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"message\": \"Document ingestion completed\",\n      \"read\": false,\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/notifications/me",
                   "host": ["{{BASE_URL}}"],
@@ -1864,17 +1648,11 @@
           "name": "Mark Notification Read",
           "request": {
             "method": "PATCH",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/notifications/{{NOTIFICATION_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/notifications/68872978782a7467070c8ec4",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "notifications", "{{NOTIFICATION_ID}}"]
+              "path": ["api", "v1", "notifications", "68872978782a7467070c8ec4"]
             },
             "description": "Marks one notification for the authenticated user as read."
           },
@@ -1883,17 +1661,16 @@
               "name": "Success",
               "originalRequest": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/notifications/{{NOTIFICATION_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/notifications/68872978782a7467070c8ec4",
                   "host": ["{{BASE_URL}}"],
-                  "path": ["api", "v1", "notifications", "{{NOTIFICATION_ID}}"]
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "68872978782a7467070c8ec4"
+                  ]
                 },
                 "description": "Marks one notification for the authenticated user as read."
               },
@@ -1907,23 +1684,22 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Notification updated successfully\",\n  \"data\": {\n    \"_id\": \"{{NOTIFICATION_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"message\": \"Document ingestion completed\",\n    \"read\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Notification updated successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec4\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"message\": \"Document ingestion completed\",\n    \"read\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/notifications/{{NOTIFICATION_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/notifications/68872978782a7467070c8ec4",
                   "host": ["{{BASE_URL}}"],
-                  "path": ["api", "v1", "notifications", "{{NOTIFICATION_ID}}"]
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "68872978782a7467070c8ec4"
+                  ]
                 },
                 "description": "Marks one notification for the authenticated user as read."
               },
@@ -1952,11 +1728,6 @@
             "method": "POST",
             "header": [
               {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              },
-              {
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
@@ -1964,7 +1735,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+              "raw": "{\n  \"documentId\": \"68872978782a7467070c8ec5\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1978,29 +1749,12 @@
             },
             "description": "Queues an ingestion job for an owned document."
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "if (body?.data?._id) pm.collectionVariables.set('INGESTION_JOB_ID', body.data._id);"
-                ]
-              }
-            }
-          ],
           "response": [
             {
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -2009,7 +1763,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "raw": "{\n  \"documentId\": \"68872978782a7467070c8ec5\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2033,18 +1787,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job queued successfully\",\n  \"data\": {\n    \"_id\": \"{{INGESTION_JOB_ID}}\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 0,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job queued successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec6\",\n    \"document\": \"68872978782a7467070c8ec5\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 0,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -2053,7 +1802,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "raw": "{\n  \"documentId\": \"68872978782a7467070c8ec5\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2085,26 +1834,15 @@
           "name": "List Ingestion Jobs",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state={{INGESTION_STATE}}",
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state=queued",
               "host": ["{{BASE_URL}}"],
-              "path": [
-                "api",
-                "v1",
-                "ingestion",
-                "jobs?state={{INGESTION_STATE}}"
-              ],
+              "path": ["api", "v1", "ingestion", "jobs?state=queued"],
               "query": [
                 {
                   "key": "state",
-                  "value": "{{INGESTION_STATE}}",
+                  "value": "queued",
                   "description": "Optional filter. Supported states: queued, processing, completed, failed."
                 }
               ]
@@ -2116,26 +1854,15 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state={{INGESTION_STATE}}",
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state=queued",
                   "host": ["{{BASE_URL}}"],
-                  "path": [
-                    "api",
-                    "v1",
-                    "ingestion",
-                    "jobs?state={{INGESTION_STATE}}"
-                  ],
+                  "path": ["api", "v1", "ingestion", "jobs?state=queued"],
                   "query": [
                     {
                       "key": "state",
-                      "value": "{{INGESTION_STATE}}",
+                      "value": "queued",
                       "description": "Optional filter. Supported states: queued, processing, completed, failed."
                     }
                   ]
@@ -2152,32 +1879,21 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion jobs retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{INGESTION_JOB_ID}}\",\n      \"document\": \"{{DOCUMENT_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"state\": \"queued\",\n      \"attempts\": 0,\n      \"maxAttempts\": 3,\n      \"lockedAt\": null,\n      \"startedAt\": null,\n      \"completedAt\": null,\n      \"failedAt\": null,\n      \"errorMessage\": null,\n      \"workerId\": null,\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion jobs retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec6\",\n      \"document\": \"68872978782a7467070c8ec5\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"state\": \"queued\",\n      \"attempts\": 0,\n      \"maxAttempts\": 3,\n      \"lockedAt\": null,\n      \"startedAt\": null,\n      \"completedAt\": null,\n      \"failedAt\": null,\n      \"errorMessage\": null,\n      \"workerId\": null,\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state={{INGESTION_STATE}}",
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state=queued",
                   "host": ["{{BASE_URL}}"],
-                  "path": [
-                    "api",
-                    "v1",
-                    "ingestion",
-                    "jobs?state={{INGESTION_STATE}}"
-                  ],
+                  "path": ["api", "v1", "ingestion", "jobs?state=queued"],
                   "query": [
                     {
                       "key": "state",
-                      "value": "{{INGESTION_STATE}}",
+                      "value": "queued",
                       "description": "Optional filter. Supported states: queued, processing, completed, failed."
                     }
                   ]
@@ -2202,17 +1918,17 @@
           "name": "Get Ingestion Job",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/68872978782a7467070c8ec6",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "ingestion", "jobs", "{{INGESTION_JOB_ID}}"]
+              "path": [
+                "api",
+                "v1",
+                "ingestion",
+                "jobs",
+                "68872978782a7467070c8ec6"
+              ]
             },
             "description": "Returns one ingestion job owned by the authenticated user."
           },
@@ -2221,22 +1937,16 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/68872978782a7467070c8ec6",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "ingestion",
                     "jobs",
-                    "{{INGESTION_JOB_ID}}"
+                    "68872978782a7467070c8ec6"
                   ]
                 },
                 "description": "Returns one ingestion job owned by the authenticated user."
@@ -2251,28 +1961,22 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job retrieved successfully\",\n  \"data\": {\n    \"_id\": \"{{INGESTION_JOB_ID}}\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 0,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job retrieved successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec6\",\n    \"document\": \"68872978782a7467070c8ec5\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 0,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/68872978782a7467070c8ec6",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "ingestion",
                     "jobs",
-                    "{{INGESTION_JOB_ID}}"
+                    "68872978782a7467070c8ec6"
                   ]
                 },
                 "description": "Returns one ingestion job owned by the authenticated user."
@@ -2295,22 +1999,16 @@
           "name": "Retry Ingestion Job",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/68872978782a7467070c8ec6/retry",
               "host": ["{{BASE_URL}}"],
               "path": [
                 "api",
                 "v1",
                 "ingestion",
                 "jobs",
-                "{{INGESTION_JOB_ID}}",
+                "68872978782a7467070c8ec6",
                 "retry"
               ]
             },
@@ -2321,22 +2019,16 @@
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/68872978782a7467070c8ec6/retry",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "ingestion",
                     "jobs",
-                    "{{INGESTION_JOB_ID}}",
+                    "68872978782a7467070c8ec6",
                     "retry"
                   ]
                 },
@@ -2352,28 +2044,22 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job requeued successfully\",\n  \"data\": {\n    \"_id\": \"{{INGESTION_JOB_ID}}\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 1,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job requeued successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec6\",\n    \"document\": \"68872978782a7467070c8ec5\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 1,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "POST",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/68872978782a7467070c8ec6/retry",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "ingestion",
                     "jobs",
-                    "{{INGESTION_JOB_ID}}",
+                    "68872978782a7467070c8ec6",
                     "retry"
                   ]
                 },
@@ -2402,21 +2088,15 @@
           "name": "List AI Usage",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/ai/usage?operation={{AI_OPERATION}}",
+              "raw": "{{BASE_URL}}/api/v1/ai/usage?operation=embedding",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "ai", "usage?operation={{AI_OPERATION}}"],
+              "path": ["api", "v1", "ai", "usage?operation=embedding"],
               "query": [
                 {
                   "key": "operation",
-                  "value": "{{AI_OPERATION}}",
+                  "value": "embedding",
                   "description": "Optional filter. Supported operations: ingestion, embedding, chat, completion."
                 }
               ]
@@ -2428,26 +2108,15 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ai/usage?operation={{AI_OPERATION}}",
+                  "raw": "{{BASE_URL}}/api/v1/ai/usage?operation=embedding",
                   "host": ["{{BASE_URL}}"],
-                  "path": [
-                    "api",
-                    "v1",
-                    "ai",
-                    "usage?operation={{AI_OPERATION}}"
-                  ],
+                  "path": ["api", "v1", "ai", "usage?operation=embedding"],
                   "query": [
                     {
                       "key": "operation",
-                      "value": "{{AI_OPERATION}}",
+                      "value": "embedding",
                       "description": "Optional filter. Supported operations: ingestion, embedding, chat, completion."
                     }
                   ]
@@ -2464,32 +2133,21 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"AI usage retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec9\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"document\": \"{{DOCUMENT_ID}}\",\n      \"ingestionJob\": \"{{INGESTION_JOB_ID}}\",\n      \"conversation\": null,\n      \"provider\": \"openai\",\n      \"model\": \"text-embedding-3-small\",\n      \"operation\": \"embedding\",\n      \"promptTokens\": 512,\n      \"completionTokens\": 0,\n      \"totalTokens\": 512,\n      \"costUsd\": 0.00001,\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"AI usage retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec9\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"document\": \"68872978782a7467070c8ec5\",\n      \"ingestionJob\": \"68872978782a7467070c8ec6\",\n      \"conversation\": null,\n      \"provider\": \"openai\",\n      \"model\": \"text-embedding-3-small\",\n      \"operation\": \"embedding\",\n      \"promptTokens\": 512,\n      \"completionTokens\": 0,\n      \"totalTokens\": 512,\n      \"costUsd\": 0.00001,\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/ai/usage?operation={{AI_OPERATION}}",
+                  "raw": "{{BASE_URL}}/api/v1/ai/usage?operation=embedding",
                   "host": ["{{BASE_URL}}"],
-                  "path": [
-                    "api",
-                    "v1",
-                    "ai",
-                    "usage?operation={{AI_OPERATION}}"
-                  ],
+                  "path": ["api", "v1", "ai", "usage?operation=embedding"],
                   "query": [
                     {
                       "key": "operation",
-                      "value": "{{AI_OPERATION}}",
+                      "value": "embedding",
                       "description": "Optional filter. Supported operations: ingestion, embedding, chat, completion."
                     }
                   ]
@@ -2521,11 +2179,6 @@
             "method": "POST",
             "header": [
               {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              },
-              {
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
@@ -2533,7 +2186,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+              "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"68872978782a7467070c8ec5\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2547,29 +2200,12 @@
             },
             "description": "Creates a conversation. `title` and `documentId` are optional; documentId must belong to the authenticated user when supplied."
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "const body = pm.response.json();",
-                  "if (body?.data?._id) pm.collectionVariables.set('CONVERSATION_ID', body.data._id);"
-                ]
-              }
-            }
-          ],
           "response": [
             {
               "name": "Success",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -2578,7 +2214,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"68872978782a7467070c8ec5\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2602,18 +2238,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Conversation created successfully\",\n  \"data\": {\n    \"_id\": \"{{CONVERSATION_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"title\": \"Document Q&A\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"status\": \"active\",\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Conversation created successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec7\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"title\": \"Document Q&A\",\n    \"document\": \"68872978782a7467070c8ec5\",\n    \"status\": \"active\",\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -2622,7 +2253,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"68872978782a7467070c8ec5\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2654,13 +2285,7 @@
           "name": "List Conversations",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{BASE_URL}}/api/v1/conversations",
               "host": ["{{BASE_URL}}"],
@@ -2673,13 +2298,7 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/conversations",
                   "host": ["{{BASE_URL}}"],
@@ -2697,19 +2316,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Conversations retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{CONVERSATION_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"title\": \"Document Q&A\",\n      \"document\": \"{{DOCUMENT_ID}}\",\n      \"status\": \"active\",\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Conversations retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec7\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"title\": \"Document Q&A\",\n      \"document\": \"68872978782a7467070c8ec5\",\n      \"status\": \"active\",\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
             },
             {
               "name": "401 Unauthorized",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{BASE_URL}}/api/v1/conversations",
                   "host": ["{{BASE_URL}}"],
@@ -2737,11 +2350,6 @@
             "method": "POST",
             "header": [
               {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              },
-              {
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
@@ -2757,13 +2365,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+              "raw": "{{BASE_URL}}/api/v1/conversations/68872978782a7467070c8ec7/messages",
               "host": ["{{BASE_URL}}"],
               "path": [
                 "api",
                 "v1",
                 "conversations",
-                "{{CONVERSATION_ID}}",
+                "68872978782a7467070c8ec7",
                 "messages"
               ]
             },
@@ -2775,11 +2383,6 @@
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -2796,13 +2399,13 @@
                   }
                 },
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "raw": "{{BASE_URL}}/api/v1/conversations/68872978782a7467070c8ec7/messages",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "conversations",
-                    "{{CONVERSATION_ID}}",
+                    "68872978782a7467070c8ec7",
                     "messages"
                   ]
                 },
@@ -2818,18 +2421,13 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Message created successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec8\",\n    \"conversation\": \"{{CONVERSATION_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"role\": \"user\",\n    \"content\": \"Summarize this document.\",\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Message created successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec8\",\n    \"conversation\": \"68872978782a7467070c8ec7\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"role\": \"user\",\n    \"content\": \"Summarize this document.\",\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "POST",
                 "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -2846,13 +2444,13 @@
                   }
                 },
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "raw": "{{BASE_URL}}/api/v1/conversations/68872978782a7467070c8ec7/messages",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "conversations",
-                    "{{CONVERSATION_ID}}",
+                    "68872978782a7467070c8ec7",
                     "messages"
                   ]
                 },
@@ -2876,21 +2474,15 @@
           "name": "List Messages",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+              "raw": "{{BASE_URL}}/api/v1/conversations/68872978782a7467070c8ec7/messages",
               "host": ["{{BASE_URL}}"],
               "path": [
                 "api",
                 "v1",
                 "conversations",
-                "{{CONVERSATION_ID}}",
+                "68872978782a7467070c8ec7",
                 "messages"
               ]
             },
@@ -2901,21 +2493,15 @@
               "name": "Success",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "raw": "{{BASE_URL}}/api/v1/conversations/68872978782a7467070c8ec7/messages",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "conversations",
-                    "{{CONVERSATION_ID}}",
+                    "68872978782a7467070c8ec7",
                     "messages"
                   ]
                 },
@@ -2931,27 +2517,21 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Messages retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec8\",\n      \"conversation\": \"{{CONVERSATION_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"role\": \"user\",\n      \"content\": \"Summarize this document.\",\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Messages retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec8\",\n      \"conversation\": \"68872978782a7467070c8ec7\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"role\": \"user\",\n      \"content\": \"Summarize this document.\",\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
             },
             {
               "name": "404 Error",
               "originalRequest": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Cookie",
-                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
-                    "type": "text"
-                  }
-                ],
+                "header": [],
                 "url": {
-                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "raw": "{{BASE_URL}}/api/v1/conversations/68872978782a7467070c8ec7/messages",
                   "host": ["{{BASE_URL}}"],
                   "path": [
                     "api",
                     "v1",
                     "conversations",
-                    "{{CONVERSATION_ID}}",
+                    "68872978782a7467070c8ec7",
                     "messages"
                   ]
                 },
@@ -2996,86 +2576,6 @@
     {
       "key": "BASE_URL",
       "value": "http://localhost:8000",
-      "type": "string"
-    },
-    {
-      "key": "COOKIE_NAME",
-      "value": "access_token",
-      "type": "string"
-    },
-    {
-      "key": "ACCESS_TOKEN",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "USER_ID",
-      "value": "68872978782a7467070c8ec3",
-      "type": "string"
-    },
-    {
-      "key": "USER_EMAIL",
-      "value": "jane@example.com",
-      "type": "string"
-    },
-    {
-      "key": "USERNAME",
-      "value": "janedoe",
-      "type": "string"
-    },
-    {
-      "key": "USER_PASSWORD",
-      "value": "Pa$$w0rd!",
-      "type": "string"
-    },
-    {
-      "key": "NEW_PASSWORD",
-      "value": "N3wPa$$word",
-      "type": "string"
-    },
-    {
-      "key": "OTP_CODE",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "NOTIFICATION_ID",
-      "value": "68872978782a7467070c8ec4",
-      "type": "string"
-    },
-    {
-      "key": "VERIFICATION_TOKEN",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "RESET_TOKEN",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "DOCUMENT_ID",
-      "value": "68872978782a7467070c8ec5",
-      "type": "string"
-    },
-    {
-      "key": "INGESTION_JOB_ID",
-      "value": "68872978782a7467070c8ec6",
-      "type": "string"
-    },
-    {
-      "key": "INGESTION_STATE",
-      "value": "queued",
-      "type": "string"
-    },
-    {
-      "key": "AI_OPERATION",
-      "value": "embedding",
-      "type": "string"
-    },
-    {
-      "key": "CONVERSATION_ID",
-      "value": "68872978782a7467070c8ec7",
       "type": "string"
     }
   ]

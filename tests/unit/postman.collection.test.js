@@ -29,24 +29,52 @@ const routeKeys = requests.map(
   ({ method, rawUrl }) =>
     `${method} ${rawUrl.replace("{{BASE_URL}}", "").split("?")[0]}`,
 );
+const collectionJson = JSON.stringify(collection);
+const variableReferences = [
+  ...new Set(
+    [...collectionJson.matchAll(/\{\{([^}]+)\}\}/g)].map((match) => match[1]),
+  ),
+].sort();
+const removedFieldPattern = new RegExp(["user", "name"].join(""), "i");
 
 test("postman collection documents AI persistence and ingestion endpoints", () => {
   assert.ok(folderNames.includes("Ingestion"));
   assert.ok(folderNames.includes("AI Usage"));
   assert.ok(folderNames.includes("Conversations"));
 
-  const rawUrls = JSON.stringify(collection);
+  const rawUrls = collectionJson;
   assert.match(rawUrls, /\/api\/v1\/ingestion\/jobs/);
   assert.match(
     rawUrls,
-    /\/api\/v1\/ingestion\/jobs\/\{\{INGESTION_JOB_ID\}\}\/retry/,
+    /\/api\/v1\/ingestion\/jobs\/68872978782a7467070c8ec6\/retry/,
   );
   assert.match(rawUrls, /\/api\/v1\/ai\/usage/);
   assert.match(rawUrls, /\/api\/v1\/conversations/);
   assert.match(
     rawUrls,
-    /\/api\/v1\/conversations\/\{\{CONVERSATION_ID\}\}\/messages/,
+    /\/api\/v1\/conversations\/68872978782a7467070c8ec7\/messages/,
   );
+});
+
+test("postman collection uses only BASE_URL as a variable", () => {
+  assert.deepEqual(collection.variable, [
+    {
+      key: "BASE_URL",
+      value: "http://localhost:8000",
+      type: "string",
+    },
+  ]);
+
+  assert.deepEqual(variableReferences, ["BASE_URL"]);
+  assert.ok(requests.every(({ rawUrl }) => rawUrl.startsWith("{{BASE_URL}}")));
+  assert.doesNotMatch(
+    collectionJson,
+    /pm\.(?:collectionVariables|environment|globals)\./,
+  );
+});
+
+test("postman collection omits removed identity fields", () => {
+  assert.doesNotMatch(collectionJson, removedFieldPattern);
 });
 
 test("postman collection mirrors current API route modules", () => {
@@ -59,7 +87,7 @@ test("postman collection mirrors current API route modules", () => {
     "POST /api/v1/auth/forgot-password",
     "PATCH /api/v1/auth/reset-password",
     "POST /api/v1/email/send-verification-email",
-    "GET /api/v1/email/verify-email/{{VERIFICATION_TOKEN}}",
+    "GET /api/v1/email/verify-email/sample-verification-token",
     "POST /api/v1/otp/send",
     "POST /api/v1/otp/verify",
     "GET /api/v1/users/me",
@@ -67,24 +95,24 @@ test("postman collection mirrors current API route modules", () => {
     "DELETE /api/v1/users/me",
     "POST /api/v1/documents/upload",
     "GET /api/v1/documents",
-    "GET /api/v1/documents/{{DOCUMENT_ID}}",
-    "DELETE /api/v1/documents/{{DOCUMENT_ID}}",
+    "GET /api/v1/documents/68872978782a7467070c8ec5",
+    "DELETE /api/v1/documents/68872978782a7467070c8ec5",
     "GET /api/v1/notifications/me",
-    "PATCH /api/v1/notifications/{{NOTIFICATION_ID}}",
+    "PATCH /api/v1/notifications/68872978782a7467070c8ec4",
     "POST /api/v1/ingestion/jobs",
     "GET /api/v1/ingestion/jobs",
-    "GET /api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
-    "POST /api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+    "GET /api/v1/ingestion/jobs/68872978782a7467070c8ec6",
+    "POST /api/v1/ingestion/jobs/68872978782a7467070c8ec6/retry",
     "GET /api/v1/ai/usage",
     "POST /api/v1/conversations",
     "GET /api/v1/conversations",
-    "POST /api/v1/conversations/{{CONVERSATION_ID}}/messages",
-    "GET /api/v1/conversations/{{CONVERSATION_ID}}/messages",
+    "POST /api/v1/conversations/68872978782a7467070c8ec7/messages",
+    "GET /api/v1/conversations/68872978782a7467070c8ec7/messages",
   ]);
 });
 
 test("postman collection removed stale user-id based routes", () => {
-  const rawUrls = JSON.stringify(collection);
+  const rawUrls = collectionJson;
   assert.doesNotMatch(rawUrls, /\/api\/v1\/users\/\{\{USER_ID\}\}/);
   assert.doesNotMatch(rawUrls, /\/api\/v1\/notifications\/\{\{USER_ID\}\}/);
 });

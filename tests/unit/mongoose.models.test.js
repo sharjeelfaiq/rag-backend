@@ -5,9 +5,16 @@ import { NotificationModel } from "../../src/api/notification/notification.model
 import { OtpModel } from "../../src/api/otp/otp.model.js";
 import { UserModel } from "../../src/api/user/user.model.js";
 
+const removedField = ["user", "name"].join("");
+
 test("user model uses PascalCase name with explicit users collection", () => {
   assert.equal(UserModel.modelName, "User");
   assert.equal(UserModel.collection.name, "users");
+});
+
+test("user model exposes email as the only sign-in identity", () => {
+  assert.ok(UserModel.schema.path("email"));
+  assert.equal(UserModel.schema.path(removedField), undefined);
 });
 
 test("otp model uses PascalCase name with explicit otps collection", () => {

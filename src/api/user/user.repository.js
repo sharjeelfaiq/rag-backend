@@ -1,25 +1,15 @@
 import { UserModel } from "./user.model.js";
 
 export const userRepository = {
-  createUser: (firstName, lastName, email, password, username) =>
+  createUser: (firstName, lastName, email, password) =>
     UserModel.create({
       firstName,
       lastName,
       email,
       password,
-      ...(username ? { username } : {}),
     }),
 
   findUserByEmail: (email) => UserModel.findOne({ email }),
-
-  findUserByEmailOrUsername: ({ email, username }) => {
-    const conditions = [
-      ...(email ? [{ email }] : []),
-      ...(username ? [{ username }] : []),
-    ];
-
-    return UserModel.findOne({ $or: conditions });
-  },
 
   findUserById: (id) => UserModel.findById(id).select("-password"),
 

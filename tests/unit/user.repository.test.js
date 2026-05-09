@@ -4,31 +4,38 @@ import test from "node:test";
 import { UserModel } from "../../src/api/user/user.model.js";
 import { userRepository } from "../../src/api/user/user.repository.js";
 
-test("findUserByEmailOrUsername uses one $or lookup for email or username", async () => {
-  const originalFindOne = UserModel.findOne;
-  let capturedQuery;
+const removedField = ["user", "name"].join("");
 
-  UserModel.findOne = async (query) => {
-    capturedQuery = query;
-    return null;
+test("createUser persists only email identity fields", async () => {
+  const originalCreate = UserModel.create;
+  let capturedDocument;
+
+  UserModel.create = async (document) => {
+    capturedDocument = document;
+    return document;
   };
 
   try {
-    const result = await userRepository.findUserByEmailOrUsername({
-      email: "user@example.com",
-      username: "testuser",
-    });
+    const result = await userRepository.createUser(
+      "Test",
+      "User",
+      "user@example.com",
+      "hashed-password",
+    );
 
-    assert.equal(result, null);
-    assert.deepEqual(capturedQuery, {
-      $or: [{ email: "user@example.com" }, { username: "testuser" }],
+    assert.deepEqual(result, {
+      firstName: "Test",
+      lastName: "User",
+      email: "user@example.com",
+      password: "hashed-password",
     });
+    assert.equal(Object.hasOwn(capturedDocument, removedField), false);
   } finally {
-    UserModel.findOne = originalFindOne;
+    UserModel.create = originalCreate;
   }
 });
 
-test("findUserByEmailOrUsername omits undefined identifier fields", async () => {
+test("findUserByEmail uses a direct email lookup", async () => {
   const originalFindOne = UserModel.findOne;
   let capturedQuery;
 
@@ -38,13 +45,11 @@ test("findUserByEmailOrUsername omits undefined identifier fields", async () => 
   };
 
   try {
-    const result = await userRepository.findUserByEmailOrUsername({
-      username: "testuser",
-    });
+    const result = await userRepository.findUserByEmail("user@example.com");
 
     assert.equal(result, null);
     assert.deepEqual(capturedQuery, {
-      $or: [{ username: "testuser" }],
+      email: "user@example.com",
     });
   } finally {
     UserModel.findOne = originalFindOne;

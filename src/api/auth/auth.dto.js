@@ -14,12 +14,6 @@ const lastNameValidation = Joi.string().trim().min(2).messages({
   "any.required": "Last name is required.",
 });
 
-const usernameValidation = Joi.string().trim().lowercase().messages({
-  "string.base": "Username should be a type of text.",
-  "string.empty": "Username should not be empty.",
-  "any.required": "Username is required.",
-});
-
 const emailValidation = Joi.string().email().trim().lowercase().messages({
   "string.base": "Email should be a type of text.",
   "string.email": "Please provide a valid email address.",
@@ -43,21 +37,14 @@ const signupDto = Joi.object({
   firstName: firstNameValidation.required(),
   lastName: lastNameValidation.required(),
   email: emailValidation.required(),
-  username: usernameValidation.optional(),
   password: passwordValidation.required(),
 });
 
 const signinDto = Joi.object({
-  email: emailValidation.optional(),
-  username: usernameValidation.optional(),
+  email: emailValidation.required(),
   password: passwordValidation.required(),
   isRemembered: isRememberedValidation.optional(),
-})
-  .xor("email", "username")
-  .messages({
-    "object.xor": "Either email or username should be provided, but not both.",
-    "object.missing": "Either email or username is required.",
-  });
+});
 
 const forgotPasswordDto = Joi.object({
   email: emailValidation.required(),

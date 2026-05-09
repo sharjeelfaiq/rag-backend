@@ -9,7 +9,7 @@ import { userRepository } from "../user/user.repository.js";
 const { BACKEND_URL, FRONTEND_URL } = env;
 
 export const authService = {
-  signup: async ({ firstName, lastName, email, password, username }) => {
+  signup: async ({ firstName, lastName, email, password }) => {
     const existingUser = await userRepository.findUserByEmail(email);
     if (existingUser)
       throw createError(400, "A user with this email already exists.");
@@ -22,7 +22,6 @@ export const authService = {
       lastName,
       email,
       hashedPassword,
-      username,
     );
     if (!newUser) throw createError(500, "Failed to create a new user.");
 
@@ -49,11 +48,8 @@ export const authService = {
     };
   },
 
-  signin: async ({ email, username, password, isRemembered }) => {
-    const existingUser = await userRepository.findUserByEmailOrUsername({
-      email,
-      username,
-    });
+  signin: async ({ email, password, isRemembered }) => {
+    const existingUser = await userRepository.findUserByEmail(email);
     if (!existingUser) throw createError(401, "Invalid email or password.");
 
     const isValid = await bcrypt.compare(password, existingUser.password);

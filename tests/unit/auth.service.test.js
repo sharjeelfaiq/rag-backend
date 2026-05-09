@@ -6,59 +6,16 @@ import { applyTestEnv } from "../helpers/env.js";
 
 applyTestEnv();
 
-test("authService.signin authenticates an existing user by username", async () => {
-  const { authService } = await import("../../src/api/auth/auth.service.js");
-  const { userRepository } =
-    await import("../../src/api/user/user.repository.js");
-  const originalFindUserByEmailOrUsername =
-    userRepository.findUserByEmailOrUsername;
-  const password = "secure-password";
-  const hashedPassword = await bcrypt.hash(password, 4);
-
-  userRepository.findUserByEmailOrUsername = async (credentials) => {
-    assert.deepEqual(credentials, { email: undefined, username: "testuser" });
-    return {
-      _id: "user-1",
-      firstName: "Test",
-      lastName: "User",
-      password: hashedPassword,
-      isEmailVerified: true,
-    };
-  };
-
-  try {
-    const result = await authService.signin({
-      username: "testuser",
-      password,
-      isRemembered: false,
-    });
-
-    assert.equal(result.message, "Sign-in successful");
-    assert.equal(typeof result.token, "string");
-    assert.deepEqual(result.data, {
-      id: "user-1",
-      name: "Test User",
-    });
-  } finally {
-    userRepository.findUserByEmailOrUsername =
-      originalFindUserByEmailOrUsername;
-  }
-});
-
 test("authService.signin preserves existing email authentication", async () => {
   const { authService } = await import("../../src/api/auth/auth.service.js");
   const { userRepository } =
     await import("../../src/api/user/user.repository.js");
-  const originalFindUserByEmailOrUsername =
-    userRepository.findUserByEmailOrUsername;
+  const originalFindUserByEmail = userRepository.findUserByEmail;
   const password = "secure-password";
   const hashedPassword = await bcrypt.hash(password, 4);
 
-  userRepository.findUserByEmailOrUsername = async (credentials) => {
-    assert.deepEqual(credentials, {
-      email: "user@example.com",
-      username: undefined,
-    });
+  userRepository.findUserByEmail = async (email) => {
+    assert.equal(email, "user@example.com");
     return {
       _id: "user-1",
       firstName: "Test",
@@ -82,20 +39,18 @@ test("authService.signin preserves existing email authentication", async () => {
       name: "Test User",
     });
   } finally {
-    userRepository.findUserByEmailOrUsername =
-      originalFindUserByEmailOrUsername;
+    userRepository.findUserByEmail = originalFindUserByEmail;
   }
 });
 
-test("authService.signin rejects missing username credentials", async () => {
+test("authService.signin rejects missing email credentials", async () => {
   const { authService } = await import("../../src/api/auth/auth.service.js");
   const { userRepository } =
     await import("../../src/api/user/user.repository.js");
-  const originalFindUserByEmailOrUsername =
-    userRepository.findUserByEmailOrUsername;
+  const originalFindUserByEmail = userRepository.findUserByEmail;
 
-  userRepository.findUserByEmailOrUsername = async (credentials) => {
-    assert.deepEqual(credentials, { email: undefined, username: "missing" });
+  userRepository.findUserByEmail = async (email) => {
+    assert.equal(email, "missing@example.com");
     return null;
   };
 
@@ -103,14 +58,13 @@ test("authService.signin rejects missing username credentials", async () => {
     await assert.rejects(
       () =>
         authService.signin({
-          username: "missing",
+          email: "missing@example.com",
           password: "secure-password",
         }),
       (error) =>
         error.status === 401 && error.message === "Invalid email or password.",
     );
   } finally {
-    userRepository.findUserByEmailOrUsername =
-      originalFindUserByEmailOrUsername;
+    userRepository.findUserByEmail = originalFindUserByEmail;
   }
 });

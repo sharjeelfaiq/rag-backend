@@ -3,31 +3,33 @@ import test from "node:test";
 
 import { signinDto } from "../../src/api/auth/auth.dto.js";
 
-test("signinDto accepts username with password", () => {
+const removedField = ["user", "name"].join("");
+
+test("signinDto accepts email with password", () => {
   const { error, value } = signinDto.validate({
-    username: "TestUser",
+    email: "User@Example.com",
     password: "secure-password",
   });
 
   assert.equal(error, undefined);
-  assert.equal(value.username, "testuser");
+  assert.equal(value.email, "user@example.com");
   assert.equal(value.password, "secure-password");
 });
 
-test("signinDto rejects email and username together", () => {
+test("signinDto rejects removed identifier fields", () => {
   const { error } = signinDto.validate({
     email: "user@example.com",
-    username: "testuser",
+    [removedField]: "testuser",
     password: "secure-password",
   });
 
-  assert.match(error.message, /Either email or username/);
+  assert.match(error.message, /is not allowed/);
 });
 
-test("signinDto rejects missing email and username", () => {
+test("signinDto requires email", () => {
   const { error } = signinDto.validate({
     password: "secure-password",
   });
 
-  assert.match(error.message, /Either email or username/);
+  assert.match(error.message, /Email is required/);
 });

@@ -1,21 +1,21 @@
 import createError from "http-errors";
 
+import { storageService } from "#storage/storage.service.js";
 import { documentRepository } from "./document.repository.js";
 import {
   computeSha256,
   createStoredFileName,
   validateDocumentFile,
 } from "./document.validation.js";
-import { storageService } from "#storage/storage.service.js";
 
-const serializeDocument = (document, storage) => {
+const serializeDocument = (document) => {
   const data =
     typeof document?.toObject === "function" ? document.toObject() : document;
   if (!data) return data;
 
   return {
     ...data,
-    fileUrl: storage.getIngestionLocation(data.storageKey),
+    fileUrl: storageService.getIngestionLocation(data.storageKey),
   };
 };
 
@@ -25,11 +25,11 @@ const createDuplicateError = (existingDocument) => {
   return error;
 };
 
-export const createDocumentService = ({ repository, storage }) => ({
+export const documentService = {
   uploadDocument: async ({ userId, file }) => {
     const metadata = validateDocumentFile(file);
     const checksumHash = computeSha256(file.buffer);
-    const existingDocument = await repository.findByChecksumForUser({
+    const existingDocument = await documentRepository.findByChecksumForUser({
       userId,
       checksumHash,
     });
@@ -42,7 +42,7 @@ export const createDocumentService = ({ repository, storage }) => ({
       originalFileName: metadata.originalFileName,
       checksumHash,
     });
-    const storedObject = await storage.save({
+    const storedObject = await storageService.save({
       buffer: file.buffer,
       userId,
       fileType: metadata.fileType,
@@ -50,12 +50,12 @@ export const createDocumentService = ({ repository, storage }) => ({
     });
 
     try {
-      const document = await repository.create({
+      const document = await documentRepository.create({
         ...metadata,
         storedFileName: storedObject.storedFileName,
         storageKey: storedObject.storageKey,
         uploadedBy: userId,
-        storageProvider: storage.provider,
+        storageProvider: storageService.provider,
         checksumHash,
         status: "uploaded",
       });
@@ -63,15 +63,16 @@ export const createDocumentService = ({ repository, storage }) => ({
       return {
         status: "success",
         message: "Document uploaded successfully",
-        data: serializeDocument(document, storage),
+        data: serializeDocument(document),
       };
     } catch (error) {
-      await storage.delete(storedObject.storageKey);
+      await storageService.delete(storedObject.storageKey);
       if (error?.code === 11000) {
-        const duplicateDocument = await repository.findByChecksumForUser({
-          userId,
-          checksumHash,
-        });
+        const duplicateDocument =
+          await documentRepository.findByChecksumForUser({
+            userId,
+            checksumHash,
+          });
         throw createDuplicateError(duplicateDocument);
       }
       throw error;
@@ -79,37 +80,35 @@ export const createDocumentService = ({ repository, storage }) => ({
   },
 
   listDocuments: async (userId) => {
-    const documents = await repository.findByUser(userId);
+    const documents = await documentRepository.findByUser(userId);
     return {
       status: "success",
       message: "Documents retrieved successfully",
-      data: documents.map((document) => serializeDocument(document, storage)),
+      data: documents.map(serializeDocument),
     };
   },
 
   getDocument: async ({ documentId, userId }) => {
-    const document = await repository.findByIdForUser({ documentId, userId });
-    if (!document) throw createError(404, "Document not found");
-
-    return {
-      status: "success",
-      message: "Document retrieved successfully",
-      data: serializeDocument(document, storage),
-    };
-  },
-
-  deleteDocument: async ({ documentId, userId }) => {
-    const document = await repository.deleteByIdForUser({
+    const document = await documentRepository.findByIdForUser({
       documentId,
       userId,
     });
     if (!document) throw createError(404, "Document not found");
 
-    await storage.delete(document.storageKey);
+    return {
+      status: "success",
+      message: "Document retrieved successfully",
+      data: serializeDocument(document),
+    };
   },
-});
 
-export const documentService = createDocumentService({
-  repository: documentRepository,
-  storage: storageService,
-});
+  deleteDocument: async ({ documentId, userId }) => {
+    const document = await documentRepository.deleteByIdForUser({
+      documentId,
+      userId,
+    });
+    if (!document) throw createError(404, "Document not found");
+
+    await storageService.delete(document.storageKey);
+  },
+};

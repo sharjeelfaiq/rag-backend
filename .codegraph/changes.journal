@@ -1,4 +1,4 @@
-# codegraph-journal v1 1778232386958
+# codegraph-journal v1 1778310909197
 src/app.js
 src/config/env.config.js
 src/lib/database.lib.js
@@ -112,4 +112,30 @@ tests/unit/ingestion.routes.test.js
 tests/unit/ingestion.service.test.js
 tests/unit/ingestion.worker.test.js
 tests/unit/ownership.routes.test.js
+tests/unit/postman.collection.test.js
+src/api/index.js
+src/api/ai-usage/ai-usage.service.js
+src/api/conversation/conversation.service.js
+src/api/document/document.service.js
+src/api/ingestion/ingestion.service.js
+src/api/email/email.controller.js
+src/api/health/health.controller.js
+src/api/notification/notification.controller.js
+src/api/notification/notification.repository.js
+src/api/notification/notification.service.js
+src/api/email/email.service.js
+tests/unit/document.service.test.js
+tests/unit/ingestion.service.test.js
+src/api/email/email.controller.js
+src/api/email/email.service.js
+src/api/health/health.controller.js
+src/api/ingestion/ingestion.service.js
+src/api/notification/notification.controller.js
+src/api/notification/notification.repository.js
+src/api/notification/notification.service.js
+tests/unit/document.service.test.js
+tests/unit/ingestion.service.test.js
+src/api/email/email.controller.js
+scripts/sync-postman-collection.mjs
+DELETED scripts/sync-postman-collection.mjs
 tests/unit/postman.collection.test.js

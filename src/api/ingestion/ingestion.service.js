@@ -6,10 +6,7 @@ import { ingestionJobRepository } from "./ingestion-job.repository.js";
 const serializeJob = (job) =>
   typeof job?.toObject === "function" ? job.toObject() : job;
 
-export const createIngestionService = ({
-  documentRepository,
-  jobRepository,
-}) => ({
+export const ingestionService = {
   createJob: async ({ documentId, userId }) => {
     const document = await documentRepository.findByIdForUser({
       documentId,
@@ -17,7 +14,7 @@ export const createIngestionService = ({
     });
     if (!document) throw createError(404, "Document not found");
 
-    const activeJob = await jobRepository.findActiveByDocumentForUser({
+    const activeJob = await ingestionJobRepository.findActiveByDocumentForUser({
       documentId,
       userId,
     });
@@ -25,7 +22,7 @@ export const createIngestionService = ({
       throw createError(409, "Document already has an active ingestion job");
     }
 
-    const job = await jobRepository.create({
+    const job = await ingestionJobRepository.create({
       document: documentId,
       user: userId,
       state: "queued",
@@ -45,7 +42,7 @@ export const createIngestionService = ({
   },
 
   listJobs: async ({ userId, state }) => {
-    const jobs = await jobRepository.findByUser({ userId, state });
+    const jobs = await ingestionJobRepository.findByUser({ userId, state });
     return {
       status: "success",
       message: "Ingestion jobs retrieved successfully",
@@ -54,7 +51,10 @@ export const createIngestionService = ({
   },
 
   getJob: async ({ jobId, userId }) => {
-    const job = await jobRepository.findByIdForUser({ jobId, userId });
+    const job = await ingestionJobRepository.findByIdForUser({
+      jobId,
+      userId,
+    });
     if (!job) throw createError(404, "Ingestion job not found");
 
     return {
@@ -65,7 +65,10 @@ export const createIngestionService = ({
   },
 
   retryJob: async ({ jobId, userId }) => {
-    const job = await jobRepository.requeueFailedForUser({ jobId, userId });
+    const job = await ingestionJobRepository.requeueFailedForUser({
+      jobId,
+      userId,
+    });
     if (!job) throw createError(404, "Failed ingestion job not found");
 
     return {
@@ -74,9 +77,4 @@ export const createIngestionService = ({
       data: serializeJob(job),
     };
   },
-});
-
-export const ingestionService = createIngestionService({
-  documentRepository,
-  jobRepository: ingestionJobRepository,
-});
+};

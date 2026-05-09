@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "9f7e01f8-ecfd-4591-8e5e-71543f5abf74",
-    "name": "Generic Backend API",
-    "description": "Runtime-aligned collection for the Express backend API.",
+    "name": "RAG Backend API",
+    "description": "Runtime-aligned collection for the Express RAG backend API. Protected routes use the configured auth cookie rather than a Bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -18,9 +18,59 @@
               "raw": "{{BASE_URL}}/health",
               "host": ["{{BASE_URL}}"],
               "path": ["health"]
-            }
+            },
+            "description": "Public health check."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/health",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["health"]
+                },
+                "description": "Public health check."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"System operational\"\n}"
+            },
+            {
+              "name": "503 Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/health",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["health"]
+                },
+                "description": "Public health check."
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 503,\n  \"message\": \"System degraded\"\n}"
+            }
+          ]
         },
         {
           "name": "Check Detailed Health",
@@ -29,7 +79,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -37,9 +87,71 @@
               "raw": "{{BASE_URL}}/health/details",
               "host": ["{{BASE_URL}}"],
               "path": ["health", "details"]
-            }
+            },
+            "description": "Protected detailed health check."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/health/details",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["health", "details"]
+                },
+                "description": "Protected detailed health check."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"System operational\",\n  \"data\": {\n    \"port\": 8000,\n    \"timestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"uptime\": \"120s\",\n    \"responseTime\": \"3ms\",\n    \"environment\": \"Development\",\n    \"memory\": {\n      \"usage\": \"64MB\",\n      \"status\": \"normal\"\n    },\n    \"database\": {\n      \"status\": \"healthy\",\n      \"responseTime\": \"1ms\"\n    },\n    \"urls\": {\n      \"backend\": \"{{BASE_URL}}\",\n      \"frontend\": \"http://localhost:3000\"\n    },\n    \"configured\": {\n      \"database\": true,\n      \"jwt\": true,\n      \"documentStorage\": true,\n      \"email\": true\n    }\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/health/details",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["health", "details"]
+                },
+                "description": "Protected detailed health check."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -59,7 +171,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\"\n}",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -70,9 +182,89 @@
               "raw": "{{BASE_URL}}/api/v1/auth/signup",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "signup"]
-            }
+            },
+            "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required; username is optional."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/signup",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "signup"]
+                },
+                "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required; username is optional."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User registered successfully. Please verify your email address.\"\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{USER_EMAIL}}\",\n  \"username\": \"{{USERNAME}}\",\n  \"password\": \"{{USER_PASSWORD}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/signup",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "signup"]
+                },
+                "description": "Creates a user and sends a verification email. firstName, lastName, email, and password are required; username is optional."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"Validation failed: Email is required.\"\n}"
+            }
+          ]
         },
         {
           "name": "Signin",
@@ -87,7 +279,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"Pa$$w0rd!\",\n  \"isRemembered\": false\n}",
+              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"isRemembered\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -98,9 +290,107 @@
               "raw": "{{BASE_URL}}/api/v1/auth/signin",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "signin"]
-            }
+            },
+            "description": "Signs in with either email or username plus password. The API sets the auth cookie and does not return the token in the JSON body."
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const setCookie = pm.response.headers.get('Set-Cookie');",
+                  "if (setCookie) {",
+                  "  const cookieName = pm.collectionVariables.get('COOKIE_NAME') || 'access_token';",
+                  "  const tokenMatch = setCookie.match(new RegExp(`${cookieName}=([^;]+)`));",
+                  "  if (tokenMatch) pm.collectionVariables.set('ACCESS_TOKEN', tokenMatch[1]);",
+                  "}",
+                  "const body = pm.response.json();",
+                  "if (body?.data?.id) pm.collectionVariables.set('USER_ID', body.data.id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"isRemembered\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/signin",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "signin"]
+                },
+                "description": "Signs in with either email or username plus password. The API sets the auth cookie and does not return the token in the JSON body."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Sign-in successful\",\n  \"data\": {\n    \"id\": \"68872978782a7467070c8ec3\",\n    \"name\": \"Jane Doe\"\n  }\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"password\": \"{{USER_PASSWORD}}\",\n  \"isRemembered\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/signin",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "signin"]
+                },
+                "description": "Signs in with either email or username plus password. The API sets the auth cookie and does not return the token in the JSON body."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"Validation failed: Either email or username is required.\"\n}"
+            }
+          ]
         },
         {
           "name": "Signout",
@@ -109,7 +399,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -117,9 +407,80 @@
               "raw": "{{BASE_URL}}/api/v1/auth/signout",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "signout"]
-            }
+            },
+            "description": "Signs out using the configured auth cookie."
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.collectionVariables.set('ACCESS_TOKEN', '');"]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/signout",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "signout"]
+                },
+                "description": "Signs out using the configured auth cookie."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Sign-out successful. The token has been invalidated.\"\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/signout",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "signout"]
+                },
+                "description": "Signs out using the configured auth cookie."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"No token found\"\n}"
+            }
+          ]
         },
         {
           "name": "Forgot Password",
@@ -134,7 +495,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"jane@example.com\"\n}",
+              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -145,9 +506,89 @@
               "raw": "{{BASE_URL}}/api/v1/auth/forgot-password",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "forgot-password"]
-            }
+            },
+            "description": "Sends a reset-password link for an existing user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/forgot-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "forgot-password"]
+                },
+                "description": "Sends a reset-password link for an existing user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": true,\n  \"message\": \"Password reset link sent to your email.\"\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/forgot-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "forgot-password"]
+                },
+                "description": "Sends a reset-password link for an existing user."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"User not found\"\n}"
+            }
+          ]
         },
         {
           "name": "Reset Password",
@@ -162,7 +603,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"N3wPa$$word\"\n}",
+              "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"{{NEW_PASSWORD}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -173,9 +614,89 @@
               "raw": "{{BASE_URL}}/api/v1/auth/reset-password",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "auth", "reset-password"]
-            }
+            },
+            "description": "Resets a password using the reset token from email."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"{{NEW_PASSWORD}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/reset-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "reset-password"]
+                },
+                "description": "Resets a password using the reset token from email."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": true,\n  \"message\": \"Password has been reset successfully.\"\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"password\": \"{{NEW_PASSWORD}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/auth/reset-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "auth", "reset-password"]
+                },
+                "description": "Resets a password using the reset token from email."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"The password reset token is invalid or expired.\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -195,7 +716,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"jane@example.com\"\n}",
+              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -206,9 +727,89 @@
               "raw": "{{BASE_URL}}/api/v1/email/send-verification-email",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "email", "send-verification-email"]
-            }
+            },
+            "description": "Sends a verification email for an existing user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/email/send-verification-email",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "email", "send-verification-email"]
+                },
+                "description": "Sends a verification email for an existing user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Verification email sent successfully\"\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/email/send-verification-email",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "email", "send-verification-email"]
+                },
+                "description": "Sends a verification email for an existing user."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"User not found\"\n}"
+            }
+          ]
         },
         {
           "name": "Verify Email",
@@ -225,9 +826,71 @@
                 "verify-email",
                 "{{VERIFICATION_TOKEN}}"
               ]
-            }
+            },
+            "description": "Verifies an email address with a verification token."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/email/verify-email/{{VERIFICATION_TOKEN}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "email",
+                    "verify-email",
+                    "{{VERIFICATION_TOKEN}}"
+                  ]
+                },
+                "description": "Verifies an email address with a verification token."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Email verified successfully\"\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/email/verify-email/{{VERIFICATION_TOKEN}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "email",
+                    "verify-email",
+                    "{{VERIFICATION_TOKEN}}"
+                  ]
+                },
+                "description": "Verifies an email address with a verification token."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"Invalid token\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -247,7 +910,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"jane@example.com\"\n}",
+              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -258,9 +921,89 @@
               "raw": "{{BASE_URL}}/api/v1/otp/send",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "otp", "send"]
-            }
+            },
+            "description": "Sends a password-reset OTP to an existing user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/otp/send",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "otp", "send"]
+                },
+                "description": "Sends a password-reset OTP to an existing user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Password reset code sent successfully\"\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/otp/send",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "otp", "send"]
+                },
+                "description": "Sends a password-reset OTP to an existing user."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"A user with this email does not exist.\"\n}"
+            }
+          ]
         },
         {
           "name": "Verify OTP",
@@ -275,7 +1018,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"otp\": \"123456\"\n}",
+              "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"otp\": \"{{OTP_CODE}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -286,9 +1029,89 @@
               "raw": "{{BASE_URL}}/api/v1/otp/verify",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "otp", "verify"]
-            }
+            },
+            "description": "Verifies the latest valid OTP for the user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"otp\": \"{{OTP_CODE}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/otp/verify",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "otp", "verify"]
+                },
+                "description": "Verifies the latest valid OTP for the user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"OTP Verified\"\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{USER_EMAIL}}\",\n  \"otp\": \"{{OTP_CODE}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/otp/verify",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "otp", "verify"]
+                },
+                "description": "Verifies the latest valid OTP for the user."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"Invalid OTP\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -296,51 +1119,303 @@
       "name": "Users",
       "item": [
         {
-          "name": "List Users",
+          "name": "Get Me",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/users",
+              "raw": "{{BASE_URL}}/api/v1/users/me",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "users"]
-            }
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Returns the authenticated user from req.user.id."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "users", "me"]
+                },
+                "description": "Returns the authenticated user from req.user.id."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User retrieved successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec3\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Doe\",\n    \"email\": \"{{USER_EMAIL}}\",\n    \"username\": \"{{USERNAME}}\",\n    \"isEmailVerified\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "users", "me"]
+                },
+                "description": "Returns the authenticated user from req.user.id."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
         },
         {
-          "name": "Get User",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "users", "{{USER_ID}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update User",
+          "name": "Update Me",
           "request": {
             "method": "PATCH",
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"username\": \"{{USERNAME}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/users/me",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Updates the authenticated user with the supplied body."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"username\": \"{{USERNAME}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "users", "me"]
+                },
+                "description": "Updates the authenticated user with the supplied body."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"message\": \"User updated successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec3\",\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Doe\",\n    \"email\": \"{{USER_EMAIL}}\",\n    \"username\": \"{{USERNAME}}\",\n    \"isEmailVerified\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"username\": \"{{USERNAME}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "users", "me"]
+                },
+                "description": "Updates the authenticated user with the supplied body."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Me",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/users/me",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Deletes the authenticated user."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "users", "me"]
+                },
+                "description": "Deletes the authenticated user."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/users/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "users", "me"]
+                },
+                "description": "Deletes the authenticated user."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -348,53 +1423,356 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "firstName",
-                  "value": "Jane",
-                  "type": "text"
-                },
-                {
-                  "key": "lastName",
-                  "value": "Doe",
-                  "type": "text"
-                },
-                {
-                  "key": "email",
-                  "value": "jane@example.com",
-                  "type": "text"
-                },
-                {
-                  "key": "avatar",
+                  "key": "document",
                   "type": "file",
                   "src": []
                 }
               ]
             },
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/documents/upload",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "users", "{{USER_ID}}"]
-            }
+              "path": ["api", "v1", "documents", "upload"]
+            },
+            "description": "Uploads one document file in multipart/form-data field `document`. Allowed types: pdf, docx, txt, md. Maximum size: 20MB."
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body?.data?._id) pm.collectionVariables.set('DOCUMENT_ID', body.data._id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "document",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents/upload",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents", "upload"]
+                },
+                "description": "Uploads one document file in multipart/form-data field `document`. Allowed types: pdf, docx, txt, md. Maximum size: 20MB."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Document uploaded successfully\",\n  \"data\": {\n    \"_id\": \"{{DOCUMENT_ID}}\",\n    \"originalFileName\": \"sample.txt\",\n    \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n    \"fileType\": \"txt\",\n    \"fileSize\": 128,\n    \"uploadedBy\": \"68872978782a7467070c8ec3\",\n    \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"storageProvider\": \"local\",\n    \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n    \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n    \"status\": \"uploaded\",\n    \"lastIngestionJob\": null,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n    \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n  }\n}"
+            },
+            {
+              "name": "400 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "document",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents/upload",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents", "upload"]
+                },
+                "description": "Uploads one document file in multipart/form-data field `document`. Allowed types: pdf, docx, txt, md. Maximum size: 20MB."
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 400,\n  \"message\": \"Document file is required\"\n}"
+            }
+          ]
         },
         {
-          "name": "Delete User",
+          "name": "List Documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/documents",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "documents"]
+            },
+            "description": "Lists documents uploaded by the authenticated user."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents"]
+                },
+                "description": "Lists documents uploaded by the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Documents retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{DOCUMENT_ID}}\",\n      \"originalFileName\": \"sample.txt\",\n      \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n      \"fileType\": \"txt\",\n      \"fileSize\": 128,\n      \"uploadedBy\": \"68872978782a7467070c8ec3\",\n      \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n      \"storageProvider\": \"local\",\n      \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n      \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n      \"status\": \"uploaded\",\n      \"lastIngestionJob\": null,\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n      \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents"]
+                },
+                "description": "Lists documents uploaded by the authenticated user."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Document",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+            },
+            "description": "Returns one document owned by the authenticated user."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                },
+                "description": "Returns one document owned by the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Document retrieved successfully\",\n  \"data\": {\n    \"_id\": \"{{DOCUMENT_ID}}\",\n    \"originalFileName\": \"sample.txt\",\n    \"storedFileName\": \"2cf24dba5fb0a30e-00000000-0000-4000-8000-000000000000.txt\",\n    \"fileType\": \"txt\",\n    \"fileSize\": 128,\n    \"uploadedBy\": \"68872978782a7467070c8ec3\",\n    \"uploadTimestamp\": \"2026-05-09T00:00:00.000Z\",\n    \"storageProvider\": \"local\",\n    \"storageKey\": \"users/68872978782a7467070c8ec3/txt/sample.txt\",\n    \"checksumHash\": \"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\",\n    \"status\": \"uploaded\",\n    \"lastIngestionJob\": null,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\",\n    \"fileUrl\": \"uploads/documents/users/68872978782a7467070c8ec3/txt/sample.txt\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                },
+                "description": "Returns one document owned by the authenticated user."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Document not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Document",
           "request": {
             "method": "DELETE",
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/users/{{USER_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "users", "{{USER_ID}}"]
-            }
+              "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+            },
+            "description": "Deletes one document owned by the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                },
+                "description": "Deletes one document owned by the authenticated user."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/documents/{{DOCUMENT_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "documents", "{{DOCUMENT_ID}}"]
+                },
+                "description": "Deletes one document owned by the authenticated user."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Document not found\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -402,23 +1780,85 @@
       "name": "Notifications",
       "item": [
         {
-          "name": "List User Notifications",
+          "name": "Get My Notifications",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/notifications/{{USER_ID}}",
+              "raw": "{{BASE_URL}}/api/v1/notifications/me",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "notifications", "{{USER_ID}}"]
-            }
+              "path": ["api", "v1", "notifications", "me"]
+            },
+            "description": "Lists notifications for the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/notifications/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "notifications", "me"]
+                },
+                "description": "Lists notifications for the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Notifications retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{NOTIFICATION_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"message\": \"Document ingestion completed\",\n      \"read\": false,\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/notifications/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "notifications", "me"]
+                },
+                "description": "Lists notifications for the authenticated user."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
         },
         {
           "name": "Mark Notification Read",
@@ -427,7 +1867,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -435,9 +1875,71 @@
               "raw": "{{BASE_URL}}/api/v1/notifications/{{NOTIFICATION_ID}}",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "notifications", "{{NOTIFICATION_ID}}"]
-            }
+            },
+            "description": "Marks one notification for the authenticated user as read."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/notifications/{{NOTIFICATION_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "notifications", "{{NOTIFICATION_ID}}"]
+                },
+                "description": "Marks one notification for the authenticated user as read."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Notification updated successfully\",\n  \"data\": {\n    \"_id\": \"{{NOTIFICATION_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"message\": \"Document ingestion completed\",\n    \"read\": true,\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/notifications/{{NOTIFICATION_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "notifications", "{{NOTIFICATION_ID}}"]
+                },
+                "description": "Marks one notification for the authenticated user as read."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Notification not found\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -451,7 +1953,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               },
               {
@@ -473,9 +1975,111 @@
               "raw": "{{BASE_URL}}/api/v1/ingestion/jobs",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "ingestion", "jobs"]
-            }
+            },
+            "description": "Queues an ingestion job for an owned document."
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body?.data?._id) pm.collectionVariables.set('INGESTION_JOB_ID', body.data._id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "ingestion", "jobs"]
+                },
+                "description": "Queues an ingestion job for an owned document."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job queued successfully\",\n  \"data\": {\n    \"_id\": \"{{INGESTION_JOB_ID}}\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 0,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "ingestion", "jobs"]
+                },
+                "description": "Queues an ingestion job for an owned document."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Document not found\"\n}"
+            }
+          ]
         },
         {
           "name": "List Ingestion Jobs",
@@ -484,17 +2088,115 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs",
+              "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state={{INGESTION_STATE}}",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "ingestion", "jobs"]
-            }
+              "path": [
+                "api",
+                "v1",
+                "ingestion",
+                "jobs?state={{INGESTION_STATE}}"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "{{INGESTION_STATE}}",
+                  "description": "Optional filter. Supported states: queued, processing, completed, failed."
+                }
+              ]
+            },
+            "description": "Lists ingestion jobs for the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state={{INGESTION_STATE}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ingestion",
+                    "jobs?state={{INGESTION_STATE}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "{{INGESTION_STATE}}",
+                      "description": "Optional filter. Supported states: queued, processing, completed, failed."
+                    }
+                  ]
+                },
+                "description": "Lists ingestion jobs for the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion jobs retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{INGESTION_JOB_ID}}\",\n      \"document\": \"{{DOCUMENT_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"state\": \"queued\",\n      \"attempts\": 0,\n      \"maxAttempts\": 3,\n      \"lockedAt\": null,\n      \"startedAt\": null,\n      \"completedAt\": null,\n      \"failedAt\": null,\n      \"errorMessage\": null,\n      \"workerId\": null,\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs?state={{INGESTION_STATE}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ingestion",
+                    "jobs?state={{INGESTION_STATE}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "{{INGESTION_STATE}}",
+                      "description": "Optional filter. Supported states: queued, processing, completed, failed."
+                    }
+                  ]
+                },
+                "description": "Lists ingestion jobs for the authenticated user."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
         },
         {
           "name": "Get Ingestion Job",
@@ -503,7 +2205,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -511,9 +2213,83 @@
               "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "ingestion", "jobs", "{{INGESTION_JOB_ID}}"]
-            }
+            },
+            "description": "Returns one ingestion job owned by the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ingestion",
+                    "jobs",
+                    "{{INGESTION_JOB_ID}}"
+                  ]
+                },
+                "description": "Returns one ingestion job owned by the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job retrieved successfully\",\n  \"data\": {\n    \"_id\": \"{{INGESTION_JOB_ID}}\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 0,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ingestion",
+                    "jobs",
+                    "{{INGESTION_JOB_ID}}"
+                  ]
+                },
+                "description": "Returns one ingestion job owned by the authenticated user."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Ingestion job not found\"\n}"
+            }
+          ]
         },
         {
           "name": "Retry Ingestion Job",
@@ -522,7 +2298,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -537,9 +2313,85 @@
                 "{{INGESTION_JOB_ID}}",
                 "retry"
               ]
-            }
+            },
+            "description": "Requeues a failed ingestion job owned by the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ingestion",
+                    "jobs",
+                    "{{INGESTION_JOB_ID}}",
+                    "retry"
+                  ]
+                },
+                "description": "Requeues a failed ingestion job owned by the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Ingestion job requeued successfully\",\n  \"data\": {\n    \"_id\": \"{{INGESTION_JOB_ID}}\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"state\": \"queued\",\n    \"attempts\": 1,\n    \"maxAttempts\": 3,\n    \"lockedAt\": null,\n    \"startedAt\": null,\n    \"completedAt\": null,\n    \"failedAt\": null,\n    \"errorMessage\": null,\n    \"workerId\": null,\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ingestion/jobs/{{INGESTION_JOB_ID}}/retry",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ingestion",
+                    "jobs",
+                    "{{INGESTION_JOB_ID}}",
+                    "retry"
+                  ]
+                },
+                "description": "Requeues a failed ingestion job owned by the authenticated user."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Failed ingestion job not found\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -553,17 +2405,110 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{BASE_URL}}/api/v1/ai/usage",
+              "raw": "{{BASE_URL}}/api/v1/ai/usage?operation={{AI_OPERATION}}",
               "host": ["{{BASE_URL}}"],
-              "path": ["api", "v1", "ai", "usage"]
-            }
+              "path": ["api", "v1", "ai", "usage?operation={{AI_OPERATION}}"],
+              "query": [
+                {
+                  "key": "operation",
+                  "value": "{{AI_OPERATION}}",
+                  "description": "Optional filter. Supported operations: ingestion, embedding, chat, completion."
+                }
+              ]
+            },
+            "description": "Lists AI usage rows for the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ai/usage?operation={{AI_OPERATION}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "usage?operation={{AI_OPERATION}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "operation",
+                      "value": "{{AI_OPERATION}}",
+                      "description": "Optional filter. Supported operations: ingestion, embedding, chat, completion."
+                    }
+                  ]
+                },
+                "description": "Lists AI usage rows for the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"AI usage retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec9\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"document\": \"{{DOCUMENT_ID}}\",\n      \"ingestionJob\": \"{{INGESTION_JOB_ID}}\",\n      \"conversation\": null,\n      \"provider\": \"openai\",\n      \"model\": \"text-embedding-3-small\",\n      \"operation\": \"embedding\",\n      \"promptTokens\": 512,\n      \"completionTokens\": 0,\n      \"totalTokens\": 512,\n      \"costUsd\": 0.00001,\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/ai/usage?operation={{AI_OPERATION}}",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "usage?operation={{AI_OPERATION}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "operation",
+                      "value": "{{AI_OPERATION}}",
+                      "description": "Optional filter. Supported operations: ingestion, embedding, chat, completion."
+                    }
+                  ]
+                },
+                "description": "Lists AI usage rows for the authenticated user."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -577,7 +2522,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               },
               {
@@ -599,9 +2544,111 @@
               "raw": "{{BASE_URL}}/api/v1/conversations",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "conversations"]
-            }
+            },
+            "description": "Creates a conversation. `title` and `documentId` are optional; documentId must belong to the authenticated user when supplied."
           },
-          "response": []
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body?.data?._id) pm.collectionVariables.set('CONVERSATION_ID', body.data._id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "conversations"]
+                },
+                "description": "Creates a conversation. `title` and `documentId` are optional; documentId must belong to the authenticated user when supplied."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Conversation created successfully\",\n  \"data\": {\n    \"_id\": \"{{CONVERSATION_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"title\": \"Document Q&A\",\n    \"document\": \"{{DOCUMENT_ID}}\",\n    \"status\": \"active\",\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Document Q&A\",\n  \"documentId\": \"{{DOCUMENT_ID}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "conversations"]
+                },
+                "description": "Creates a conversation. `title` and `documentId` are optional; documentId must belong to the authenticated user when supplied."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Document not found\"\n}"
+            }
+          ]
         },
         {
           "name": "List Conversations",
@@ -610,7 +2657,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -618,9 +2665,71 @@
               "raw": "{{BASE_URL}}/api/v1/conversations",
               "host": ["{{BASE_URL}}"],
               "path": ["api", "v1", "conversations"]
-            }
+            },
+            "description": "Lists conversations for the authenticated user."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "conversations"]
+                },
+                "description": "Lists conversations for the authenticated user."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Conversations retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"{{CONVERSATION_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"title\": \"Document Q&A\",\n      \"document\": \"{{DOCUMENT_ID}}\",\n      \"status\": \"active\",\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "v1", "conversations"]
+                },
+                "description": "Lists conversations for the authenticated user."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Token is missing in the authorization cookie.\"\n}"
+            }
+          ]
         },
         {
           "name": "Create Message",
@@ -629,7 +2738,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               },
               {
@@ -657,9 +2766,111 @@
                 "{{CONVERSATION_ID}}",
                 "messages"
               ]
-            }
+            },
+            "description": "Creates a message in an owned conversation. role is one of user, assistant, system, tool."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"user\",\n  \"content\": \"Summarize this document.\",\n  \"metadata\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "conversations",
+                    "{{CONVERSATION_ID}}",
+                    "messages"
+                  ]
+                },
+                "description": "Creates a message in an owned conversation. role is one of user, assistant, system, tool."
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Message created successfully\",\n  \"data\": {\n    \"_id\": \"68872978782a7467070c8ec8\",\n    \"conversation\": \"{{CONVERSATION_ID}}\",\n    \"user\": \"68872978782a7467070c8ec3\",\n    \"role\": \"user\",\n    \"content\": \"Summarize this document.\",\n    \"metadata\": {},\n    \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n    \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"user\",\n  \"content\": \"Summarize this document.\",\n  \"metadata\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "conversations",
+                    "{{CONVERSATION_ID}}",
+                    "messages"
+                  ]
+                },
+                "description": "Creates a message in an owned conversation. role is one of user, assistant, system, tool."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Conversation not found\"\n}"
+            }
+          ]
         },
         {
           "name": "List Messages",
@@ -668,7 +2879,7 @@
             "header": [
               {
                 "key": "Cookie",
-                "value": "access_token={{ACCESS_TOKEN}}",
+                "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
                 "type": "text"
               }
             ],
@@ -682,9 +2893,83 @@
                 "{{CONVERSATION_ID}}",
                 "messages"
               ]
-            }
+            },
+            "description": "Lists messages in an owned conversation."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "conversations",
+                    "{{CONVERSATION_ID}}",
+                    "messages"
+                  ]
+                },
+                "description": "Lists messages in an owned conversation."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"message\": \"Messages retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68872978782a7467070c8ec8\",\n      \"conversation\": \"{{CONVERSATION_ID}}\",\n      \"user\": \"68872978782a7467070c8ec3\",\n      \"role\": \"user\",\n      \"content\": \"Summarize this document.\",\n      \"metadata\": {},\n      \"createdAt\": \"2026-05-09T00:00:00.000Z\",\n      \"updatedAt\": \"2026-05-09T00:00:00.000Z\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "404 Error",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "{{COOKIE_NAME}}={{ACCESS_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/v1/conversations/{{CONVERSATION_ID}}/messages",
+                  "host": ["{{BASE_URL}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "conversations",
+                    "{{CONVERSATION_ID}}",
+                    "messages"
+                  ]
+                },
+                "description": "Lists messages in an owned conversation."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": 404,\n  \"message\": \"Conversation not found\"\n}"
+            }
+          ]
         }
       ]
     }
@@ -714,6 +2999,11 @@
       "type": "string"
     },
     {
+      "key": "COOKIE_NAME",
+      "value": "access_token",
+      "type": "string"
+    },
+    {
       "key": "ACCESS_TOKEN",
       "value": "",
       "type": "string"
@@ -721,6 +3011,31 @@
     {
       "key": "USER_ID",
       "value": "68872978782a7467070c8ec3",
+      "type": "string"
+    },
+    {
+      "key": "USER_EMAIL",
+      "value": "jane@example.com",
+      "type": "string"
+    },
+    {
+      "key": "USERNAME",
+      "value": "janedoe",
+      "type": "string"
+    },
+    {
+      "key": "USER_PASSWORD",
+      "value": "Pa$$w0rd!",
+      "type": "string"
+    },
+    {
+      "key": "NEW_PASSWORD",
+      "value": "N3wPa$$word",
+      "type": "string"
+    },
+    {
+      "key": "OTP_CODE",
+      "value": "",
       "type": "string"
     },
     {
@@ -746,6 +3061,16 @@
     {
       "key": "INGESTION_JOB_ID",
       "value": "68872978782a7467070c8ec6",
+      "type": "string"
+    },
+    {
+      "key": "INGESTION_STATE",
+      "value": "queued",
+      "type": "string"
+    },
+    {
+      "key": "AI_OPERATION",
+      "value": "embedding",
       "type": "string"
     },
     {

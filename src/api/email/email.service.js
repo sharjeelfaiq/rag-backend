@@ -1,8 +1,8 @@
 import createError from "http-errors";
 
 import { env } from "#config/env.config.js";
-import { verifyToken, generateToken } from "#lib/token.lib.js";
 import { sendEmail } from "#lib/email.lib.js";
+import { generateToken, verifyToken } from "#lib/token.lib.js";
 import { userRepository } from "../user/user.repository.js";
 
 const { BACKEND_URL, FRONTEND_URL } = env;

@@ -2,19 +2,19 @@ import { handlePromise } from "#lib/promise.lib.js";
 import { notificationService } from "./notification.service.js";
 
 export const notificationController = {
-  getMyNotifications: handlePromise(async (request, response) => {
+  getMyNotifications: handlePromise(async (req, res) => {
     const responseBody = await notificationService.getMyNotifications(
-      request.user.id,
+      req.user.id,
     );
-    response.status(200).json(responseBody);
+    res.status(200).json(responseBody);
   }),
 
-  updateNotificationById: handlePromise(async (request, response) => {
-    const { notiId } = request.params;
+  updateNotificationById: handlePromise(async (req, res) => {
+    const { notiId } = req.params;
     const responseBody = await notificationService.updateNotificationById(
       notiId,
-      request.user.id,
+      req.user.id,
     );
-    response.status(200).json(responseBody);
+    res.status(200).json(responseBody);
   }),
 };

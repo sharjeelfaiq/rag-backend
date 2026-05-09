@@ -1,24 +1,23 @@
 import createError from "http-errors";
 
 import { documentRepository } from "#api/document/document.repository.js";
-import { conversationRepository } from "./conversation.repository.js";
 import { messageRepository } from "#api/message/message.repository.js";
+import { conversationRepository } from "./conversation.repository.js";
 
 const serialize = (data) =>
   typeof data?.toObject === "function" ? data.toObject() : data;
 
-export const createConversationService = ({
-  conversations,
-  documents,
-  messages,
-}) => ({
+export const conversationService = {
   createConversation: async ({ userId, title, documentId }) => {
     if (documentId) {
-      const document = await documents.findByIdForUser({ documentId, userId });
+      const document = await documentRepository.findByIdForUser({
+        documentId,
+        userId,
+      });
       if (!document) throw createError(404, "Document not found");
     }
 
-    const conversation = await conversations.create({
+    const conversation = await conversationRepository.create({
       user: userId,
       title,
       ...(documentId ? { document: documentId } : {}),
@@ -32,7 +31,7 @@ export const createConversationService = ({
   },
 
   listConversations: async (userId) => {
-    const conversationList = await conversations.findByUser(userId);
+    const conversationList = await conversationRepository.findByUser(userId);
     return {
       status: "success",
       message: "Conversations retrieved successfully",
@@ -47,13 +46,13 @@ export const createConversationService = ({
     content,
     metadata,
   }) => {
-    const conversation = await conversations.findByIdForUser({
+    const conversation = await conversationRepository.findByIdForUser({
       conversationId,
       userId,
     });
     if (!conversation) throw createError(404, "Conversation not found");
 
-    const message = await messages.create({
+    const message = await messageRepository.create({
       conversation: conversationId,
       user: userId,
       role,
@@ -69,23 +68,18 @@ export const createConversationService = ({
   },
 
   listMessages: async ({ conversationId, userId }) => {
-    const conversation = await conversations.findByIdForUser({
+    const conversation = await conversationRepository.findByIdForUser({
       conversationId,
       userId,
     });
     if (!conversation) throw createError(404, "Conversation not found");
 
-    const messageList = await messages.findByConversation(conversationId);
+    const messageList =
+      await messageRepository.findByConversation(conversationId);
     return {
       status: "success",
       message: "Messages retrieved successfully",
       data: messageList.map(serialize),
     };
   },
-});
-
-export const conversationService = createConversationService({
-  conversations: conversationRepository,
-  documents: documentRepository,
-  messages: messageRepository,
-});
+};
